@@ -1,0 +1,15 @@
+Vagrant.configure("2") do |config|
+  config.vm.box = "debian/buster64"
+  config.vm.hostname = "learning-devops"
+
+  config.vm.network "forwarded_port", guest: 80, host: 8080
+  config.vm.network "forwarded_port", guest: 81, host: 8081
+
+  config.vm.synced_folder "./sites", "/var/www/html", type: "rsync",
+    rsync__exclude: ".git/"
+    
+#added script for shell
+  config.vm.provision "shell", path: "script.sh"
+
+
+end
