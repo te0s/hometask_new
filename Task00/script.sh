@@ -4,8 +4,11 @@ yes | apt-get install apache2
 yes | apt-get install php-cgi
 yes | apt-get install php-cli
 yes | apt-get install php-fpm
+yes | apt-get install libapache2-mpm-itk
+yes | apt-get install libapache2-mod-php
 yes | a2enmod rewrite
 yes | service apache2 restart
+
 
 rm /etc/apache2/sites-available/01-demosite-static.conf
 touch /etc/apache2/sites-available/01-demosite-static.conf
