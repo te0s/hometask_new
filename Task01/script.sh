@@ -1,20 +1,13 @@
 #!/bin/bash
 
-
-sudo yum update -y
-sudo yum install -y httpd
-sudo yum install -y mysql-server
-sudo yum install -y php
-sudo yum install -y mc
-
-
 sudo systemctl enable httpd
 sudo systemctl start httpd
 sudo systemctl start mysqld
 
+
 #added sites conf
 sudo touch /etc/httpd/conf.d/01-demosite-static.conf
-cat <<PAST | sudo tee /etc/httpd/conf.d/01-demosite-static.conf
+sudo cat <<PAST | sudo tee /etc/httpd/conf.d/01-demosite-static.conf
 <VirtualHost *:80>
         ServerAdmin webmaster@localhost
         DocumentRoot /var/www/html/01-demosite-static
@@ -23,7 +16,7 @@ cat <<PAST | sudo tee /etc/httpd/conf.d/01-demosite-static.conf
 PAST
 
 sudo touch /etc/httpd/conf.d/01-demosite-php.conf
-cat <<PAST | sudo tee /etc/httpd/conf.d/01-demosite-php.conf
+sudo cat <<PAST | sudo tee /etc/httpd/conf.d/01-demosite-php.conf
 <VirtualHost *:81>
         ServerAdmin webmaster@localhost
         DocumentRoot /var/www/html/01-demosite-php

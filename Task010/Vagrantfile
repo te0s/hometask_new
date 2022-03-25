@@ -1,0 +1,75 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+# All Vagrant configuration is done below. The "2" in Vagrant.configure
+# configures the configuration version (we support older styles for
+# backwards compatibility). Please don't change it unless you know what
+# you're doing.
+Vagrant.configure("2") do |config|
+    # The most common configuration options are documented and commented below.
+    # For a complete reference, please see the online documentation at
+    # https://docs.vagrantup.com.
+  
+    # Every Vagrant development environment requires a box. You can search for
+    # boxes at https://vagrantcloud.com/search.
+    
+    config.vm.box = "newcentos"
+    
+    config.vm.provision :file, source: '../sites', destination:  "/tmp"
+    
+    config.vm.network "forwarded_port", guest: 8080, host: 8080, host_ip: "127.0.0.1"
+    config.vm.network "forwarded_port", guest: 8081, host: 8081, host_ip: "127.0.0.1"
+      
+    
+    config.vm.provision "shell", inline: <<-SHELL
+       
+          sudo chmod 775 /var/www/html
+          sudo chown -R root:vagrant /var/www/html/
+          sudo cd /etc/yum.repos.d/
+          sudo sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/CentOS-*
+          sudo sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-*
+          yum update -y
+
+          sudo yum install -y nano
+          sudo dnf install -y net-tools
+    SHELL
+    
+       
+       
+      config.vm.provision "shell", inline: <<-SHELL
+          
+          sudo setenforce 0
+          echo "SELINUX=disabled" > /etc/selinux/config
+          
+          echo -e "Listen 8080\nListen 8081" >> /etc/httpd/conf/httpd.conf
+          
+          echo "IncludeOptional sites-enabled/*.conf" >> /etc/httpd/conf/httpd.conf
+          
+          sudo mkdir "/var/www/01-demosite-php/"
+          sudo mkdir "/var/www/01-demosite-static/"
+          sudo mv /tmp/01-demosite-php/* /var/www/01-demosite-php/
+          sudo mv /tmp/01-demosite-static/* /var/www/01-demosite-static/
+       
+          sudo chmod 775 /var/www/01-demosite-php/
+          sudo chown -R root:vagrant /var/www/01-demosite-php/
+       
+          sudo chmod 775 /var/www/01-demosite-static/
+          sudo chown -R root:vagrant /var/www/01-demosite-static/
+          
+  #		sudo mkdir -p /var/www/01-demosite-php/log
+  #		sudo mkdir -p /var/www/01-demosite-static/log
+          
+          sudo mkdir /etc/httpd/sites-available /etc/httpd/sites-enabled
+          
+          sudo mv /tmp/conf1.conf /etc/httpd/sites-available/
+          sudo ln -s /etc/httpd/sites-available/conf1.conf /etc/httpd/sites-enabled/conf1.conf
+          
+          sudo systemctl restart httpd
+          
+          
+      SHELL
+  
+    
+    
+  end
+  
