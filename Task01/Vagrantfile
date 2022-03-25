@@ -55,10 +55,7 @@ Vagrant.configure("2") do |config|
        
           sudo chmod 775 /var/www/01-demosite-static/
           sudo chown -R root:vagrant /var/www/01-demosite-static/
-          
-  #		sudo mkdir -p /var/www/01-demosite-php/log
-  #		sudo mkdir -p /var/www/01-demosite-static/log
-          
+                   
           sudo mkdir /etc/httpd/sites-available /etc/httpd/sites-enabled
           
           sudo mv /tmp/conf1.conf /etc/httpd/sites-available/
