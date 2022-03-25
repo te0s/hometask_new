@@ -13,7 +13,7 @@ Vagrant.configure("2") do |config|
     # Every Vagrant development environment requires a box. You can search for
     # boxes at https://vagrantcloud.com/search.
     
-    config.vm.box = "newcentos"
+    config.vm.box = "te0s/CentOS8-Generic-LAMP"
     
     config.vm.provision :file, source: '../sites', destination:  "/tmp"
     
