@@ -10,7 +10,6 @@ yes | a2enmod rewrite
 yes | service apache2 restart
 
 
-rm /etc/apache2/sites-available/01-demosite-static.conf
 touch /etc/apache2/sites-available/01-demosite-static.conf
 cat <<PAST | tee -a /etc/apache2/sites-available/01-demosite-static.conf
 <VirtualHost *:80>
@@ -22,7 +21,7 @@ cat <<PAST | tee -a /etc/apache2/sites-available/01-demosite-static.conf
 </VirtualHost>
 PAST
 
-rm /etc/apache2/sites-available/01-demosite-php.conf
+
 touch /etc/apache2/sites-available/01-demosite-php.conf
 cat <<PAST | tee -a /etc/apache2/sites-available/01-demosite-php.conf
 <VirtualHost *:81>
