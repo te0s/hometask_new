@@ -4,7 +4,8 @@
 
   tasks:
 
-    - name: install nano and net-tools
+    - name: httpd
+      become: yes
       yum: 
         name: "{{ packages }}"
       vars:
@@ -13,16 +14,9 @@
         - php
         
     - name: disable SElinux
+      become: yes
       selinux:
         state: disabled
-
-    - name: chmod
-      file:
-        path: /var/www
-        owner: root
-        group: vagrant
-        mode: 775
-        recurse: yes
 
     - name: add static
       become: yes
