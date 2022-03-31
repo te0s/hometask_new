@@ -11,9 +11,6 @@
         packages:
         - httpd
         - php
-        - nano
-        - net-tools
-        - mc
         
     - name: disable SElinux
       selinux:
@@ -68,9 +65,8 @@
         insertafter: '^#Listen'
         line: "Listen 8080\nListen 8081"
 
-    - name: restart service httpd on centos
-      become: yes
+    - name: restart httpd
       systemd:
-        state: restarted
-        daemon_reload: yes
         name: httpd
+        enabled: yes
+        state: reloaded
