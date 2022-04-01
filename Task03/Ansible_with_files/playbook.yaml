@@ -1,0 +1,42 @@
+---
+- name: popitka nomer 23547
+  hosts: all
+  become: yes
+
+  tasks: 
+    
+    - name: add directory
+      file:
+        path: /var/www
+        state: directory 
+        mode: '0775'
+  
+    - file:
+        path: /var/www/01-demosite-static
+        state: directory
+
+    - file:
+        path: /var/www/01-demosite-php
+        state: directory
+
+    - name: add conf
+      copy:
+        src: /vagrant/httpd.conf
+        dest: /etc/httpd/conf/httpd.conf
+
+    - copy: 
+        src: /vagrant/000-default.conf
+        dest: /etc/httpd/conf.d/000-default.conf
+
+    - copy:
+        src: /vagrant/index.html
+        dest: /var/www/01-demosite-static/index.html
+
+    - copy:
+        src: /vagrant/index.php
+        dest: /var/www/01-demosite-php/index.php
+    
+    - name: restart apache2
+      service:
+        name: httpd
+        state: restarted

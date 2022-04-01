@@ -59,7 +59,7 @@
         insertafter: '^#Listen'
         line: "Listen 8080\nListen 8087"
 
-    - name: restart httpd
+    - name: restart apache2
       systemd:
         name: httpd
         enabled: yes

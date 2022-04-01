@@ -1,0 +1,16 @@
+  Vagrant.configure("2") do |config|
+  config.vm.box = "te0s/CentOS8-Generic-LAMP"
+  config.ssh.insert_key = false  
+  config.vm.synced_folder ".", "/vagrant"
+  config.vm.box_check_update = false
+  config.vm.network "forwarded_port", guest: 80, host: 8080, host_ip: "127.0.0.1"
+  config.vm.network "forwarded_port", guest: 81, host: 8081, host_ip: "127.0.0.1"
+
+
+
+     config.vm.provision "ansible_local" do |ansible|
+        ansible.playbook = "playbook.yaml"
+        ansible.become = true     
+    end
+
+end
