@@ -1,0 +1,49 @@
+---
+- name: jast do it
+  hosts: all
+  become: yes
+
+  tasks: 
+    
+    - name: Install LXC and pyton
+      package:
+        name:
+          - lxc
+          - lxc-templates
+          - python-pip
+          - lxc-dev
+        state: present
+
+    - name: Install LXC2
+      pip:
+        name: lxc-python2       
+    
+    - name: make dir and file
+      file:
+        path: /etc/default/lxc-net
+        state: touch
+    - file:    
+        path: /etc/lxc/lxc-usernet
+        state: touch
+    - file:
+        path: /var/lib/lxc/cent1/rootfs/var/www/01-demosite-static
+        state: directory
+    - file:
+        path: /var/lib/lxc/cent2/rootfs/var/www/01-demosite-php
+        state: directory
+
+
+    - name: Make lan1
+      lineinfile:
+        path: /etc/default/lxc-net
+        line: "{{item}}"
+      with_items:
+         - USE_LXC_BRIDGE="true"
+         - LXC_BRIDGE="lxcbr0" 
+         - LXC_ADDR="10.0.3.1"
+         - LXC_NETMASK="255.255.255.0"
+         - LXC_NETWORK="10.0.3.0/24"
+         - LXC_DHCP_RANGE="10.0.3.2,10.0.3.254"
+         - LXC_DHCP_MAX="253"
+         - LXC_DHCP_CONFILE=""
+         - LXC_DOMAIN=""
