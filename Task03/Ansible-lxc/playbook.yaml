@@ -26,10 +26,10 @@
         path: /etc/lxc/lxc-usernet
         state: touch
     - file:
-        path: /var/lib/lxc/cent1/rootfs/var/www/01-demosite-static
+        path: /var/lib/lxc/centos1/rootfs/var/www/01-demosite-static
         state: directory
     - file:
-        path: /var/lib/lxc/cent2/rootfs/var/www/01-demosite-php
+        path: /var/lib/lxc/centos2/rootfs/var/www/01-demosite-php
         state: directory
 
 
@@ -83,7 +83,7 @@
   
     - name: make centos1
       lxc_container:
-        name: cent1
+        name: centos1
         template: download
         template_options: --dist centos --release 8 --arch amd64
         state: started
@@ -97,7 +97,7 @@
     
     - name: make centos2
       lxc_container:
-        name: cent2
+        name: centos2
         template: download
         template_options: --dist centos --release 8 --arch amd64
         state: started
@@ -109,4 +109,56 @@
           systemctl start httpd   
           sleep 5          
 
-          
+    - name: copy static dinamic
+      copy: 
+        src: /vagrant/index.html
+        dest: /var/lib/lxc/centos1/rootfs/var/www/01-demosite-static/
+    - copy:
+        src: /vagrant/index.php
+        dest: /var/lib/lxc/centos2/rootfs/var/www/01-demosite-php/
+
+    - name: Add port 81 conteiner 2
+      replace:
+        path: /var/lib/lxc/centos2/rootfs/etc/httpd/conf/httpd.conf
+        regexp: 'Listen 80'
+        replace: 'Listen 81'
+
+    - name: VirtualHost conteiner 2
+      file:
+        path: /var/lib/lxc/centos2/rootfs/etc/httpd/conf.d/default.conf
+        state: touch
+    - lineinfile:
+        path: /var/lib/lxc/centos2/rootfs/etc/httpd/conf.d/default.conf
+        line: "{{item}}"
+      with_items:
+         - <VirtualHost *:81>
+         - DocumentRoot /var/www/01-demosite-php/ 
+         - </VirtualHost>
+
+    - name: VirtualHost conteiner 1
+      file:
+        path: /var/lib/lxc/centos1/rootfs/etc/httpd/conf.d/default.conf
+        state: touch
+    - lineinfile:
+        path: /var/lib/lxc/centos1/rootfs/etc/httpd/conf.d/default.conf
+        line: "{{item}}"
+      with_items:
+         - <VirtualHost *:80>
+         - DocumentRoot /var/www/01-demosite-static/ 
+         - </VirtualHost>
+
+
+    - name: Restart Apacher centos1
+      lxc_container:
+        name: centos1
+        container_command: |
+          systemctl restart httpd
+    - name: Restart Apacher centos2
+      lxc_container:
+        name: centos2
+        container_command: |
+          systemctl restart httpd
+    - name: IPTABLES
+      shell: ip=$(sudo lxc-info -n centos1 -iH);sudo iptables -t nat -I PREROUTING -i eth0 -p tcp --dport 80 -j DNAT --to-destination ${ip}:80
+    - shell: ip=$(sudo lxc-info -n centos2 -iH);sudo iptables -t nat -I PREROUTING -i eth0 -p tcp --dport 81 -j DNAT --to-destination ${ip}:81
+            
