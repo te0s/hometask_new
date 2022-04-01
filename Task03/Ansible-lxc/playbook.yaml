@@ -61,3 +61,52 @@
       lineinfile:
         path: /etc/lxc/lxc-usernet 
         line: "root veth lxcbr0 10"         
+
+    - name: Change 
+      replace:
+        path: /etc/default/lxc
+        regexp: 'USE_LXC_BRIDGE="false"'
+        replace: 'USE_LXC_BRIDGE="true"'
+    - replace:
+        path: /etc/lxc/default.conf
+        regexp: 'lxc.net.0.type = empty'
+        replace: 'lxc.net.0.type = veth'
+    - replace:
+        path: /etc/lxc/default.conf
+        regexp: 'lxc.apparmor.profile = generated'
+        replace: 'lxc.apparmor.profile = unconfined'
+    
+    - name: Enabled_LAN 
+      systemd:
+        name: lxc-net
+        state: started
+  
+    - name: make centos1
+      lxc_container:
+        name: cent1
+        template: download
+        template_options: --dist centos --release 8 --arch amd64
+        state: started
+        container_command: |
+          sleep 10
+          yum -y install httpd
+          yum -y install php
+          systemctl enable httpd
+          systemctl start httpd
+          sleep 5   
+    
+    - name: make centos2
+      lxc_container:
+        name: cent2
+        template: download
+        template_options: --dist centos --release 8 --arch amd64
+        state: started
+        container_command: |
+          sleep 10
+          yum -y install httpd
+          yum -y install php
+          systemctl enable httpd
+          systemctl start httpd   
+          sleep 5          
+
+          
