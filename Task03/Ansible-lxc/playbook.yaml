@@ -33,7 +33,7 @@
         state: directory
 
 
-    - name: Make lan1
+    - name: conf lan
       lineinfile:
         path: /etc/default/lxc-net
         line: "{{item}}"
@@ -47,3 +47,17 @@
          - LXC_DHCP_MAX="253"
          - LXC_DHCP_CONFILE=""
          - LXC_DOMAIN=""
+
+    - name: lan1
+      lineinfile:
+        path: /etc/lxc/default.conf
+        line: "{{item}}"
+      with_items:
+         - lxc.net.0.flags = up
+         - lxc.net.0.link = lxcbr0 
+         - lxc.start.auto = 1
+
+    - name: lan2
+      lineinfile:
+        path: /etc/lxc/lxc-usernet 
+        line: "root veth lxcbr0 10"         
