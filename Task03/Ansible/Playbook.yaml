@@ -46,7 +46,7 @@
       blockinfile:
         path: /etc/httpd/conf.d/01-demosite-php.conf
         block: |
-          <VirtualHost *:81>
+          <VirtualHost *:87>
             ServerAdmin webmaster@localhost
             DocumentRoot /var/www/html/01-demosite-php
             DirectoryIndex index.php
@@ -57,7 +57,7 @@
         path: /etc/httpd/conf/httpd.conf
         regexp: '^Listen'
         insertafter: '^#Listen'
-        line: "Listen 8080\nListen 8081"
+        line: "Listen 8080\nListen 8087"
 
     - name: restart httpd
       systemd:
