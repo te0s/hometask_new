@@ -10,14 +10,13 @@
         name:
           - lxc
           - lxc-templates
-          - python-pip
           - lxc-dev
-        state: present
+          - python3-pip
+          - python3-lxc
+          - lxc-dev
+        state: latest
+        update_cache: true
 
-    - name: Install LXC2
-      pip:
-        name: lxc-python2       
-    
     - name: make dir and file
       file:
         path: /etc/default/lxc-net
@@ -62,7 +61,7 @@
         path: /etc/lxc/lxc-usernet 
         line: "root veth lxcbr0 10"         
 
-    - name: Change 
+    - name: Change parametrs
       replace:
         path: /etc/default/lxc
         regexp: 'USE_LXC_BRIDGE="false"'
@@ -85,7 +84,7 @@
       lxc_container:
         name: centos1
         template: download
-        template_options: --dist centos --release 8 --arch amd64
+        template_options: --dist centos --release 8-Stream --arch amd64 --no-validate
         state: started
         container_command: |
           sleep 10
@@ -99,7 +98,7 @@
       lxc_container:
         name: centos2
         template: download
-        template_options: --dist centos --release 8 --arch amd64
+        template_options: --dist centos --release 8-Stream --arch amd64 --no-validate
         state: started
         container_command: |
           sleep 10
@@ -153,11 +152,13 @@
         name: centos1
         container_command: |
           systemctl restart httpd
+
     - name: Restart Apacher centos2
       lxc_container:
         name: centos2
         container_command: |
           systemctl restart httpd
+
     - name: IPTABLES
       shell: ip=$(sudo lxc-info -n centos1 -iH);sudo iptables -t nat -I PREROUTING -i eth0 -p tcp --dport 80 -j DNAT --to-destination ${ip}:80
     - shell: ip=$(sudo lxc-info -n centos2 -iH);sudo iptables -t nat -I PREROUTING -i eth0 -p tcp --dport 81 -j DNAT --to-destination ${ip}:81
