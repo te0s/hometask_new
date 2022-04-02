@@ -14,8 +14,14 @@
           - python3-pip
           - python3-lxc
           - lxc-dev
+          - python-pip
         state: latest
         update_cache: true
+
+
+    - name: Install lcx2
+      pip:
+        name: lxc-python2
 
     - name: make dir and file
       file:
