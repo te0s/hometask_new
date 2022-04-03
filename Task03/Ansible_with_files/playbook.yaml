@@ -4,6 +4,15 @@
   become: yes
 
   tasks: 
+
+    - name: install packages
+      become: yes
+      dnf:
+         pkg:
+         - mc
+         - httpd
+         - php
+         state: present
     
     - name: add directory
       file:

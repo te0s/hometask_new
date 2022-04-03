@@ -13,19 +13,7 @@ Vagrant.configure("2") do |config|
     # Every Vagrant development environment requires a box. You can search for
     # boxes at https://vagrantcloud.com/search.
     
-    config.vm.box = "newcentos"
+    config.vm.box = "boxomCentos9Steam"
       
-    
-    config.vm.provision "shell", inline: <<-SHELL
-       
-          sudo chmod 775 /var/www/html
-          sudo chown -R root:vagrant /var/www/html/
-          sudo cd /etc/yum.repos.d/
-          sudo sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/CentOS-*
-          sudo sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-*
-          yum update -y
-
-          sudo yum install -y nano
-          sudo dnf install -y net-tools
-    SHELL
+#    config.vm.provision "shell", path: "script.sh"
 end
