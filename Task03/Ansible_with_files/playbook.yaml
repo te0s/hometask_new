@@ -1,5 +1,5 @@
 ---
-- name: popitka nomer 1289724
+- name: popitka nomer 1289725
   hosts: all
   become: yes
 
@@ -13,7 +13,12 @@
          - httpd
          - php
          state: latest
-    
+
+    - name: disable SELinux
+      shell: |
+        setenforce 0
+        sed -i 's/enforcing/disabled/g' /etc/selinux/config /etc/selinux/config
+
     - name: add directory
       file:
         path: /var/www
