@@ -1,5 +1,5 @@
 ---
-- name: popitka nomer 23547
+- name: popitka nomer 1289724
   hosts: all
   become: yes
 
@@ -12,7 +12,7 @@
          - mc
          - httpd
          - php
-         state: present
+         state: latest
     
     - name: add directory
       file:
