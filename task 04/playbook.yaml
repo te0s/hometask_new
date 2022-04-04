@@ -1,0 +1,22 @@
+---
+- name: jast do it
+  hosts: all
+  become: yes
+
+
+
+
+  tasks:
+    - name: install packages
+      dnf:
+        pkg:
+         - nano
+         - mc
+         - httpd
+         - php
+
+    - name: disable SELinux
+      shell: |
+        setenforce 0
+        sed -i 's/enforcing/disabled/g' /etc/selinux/config /etc/selinux/config
+        
