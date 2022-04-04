@@ -1,5 +1,5 @@
 ---
-- name: popitka nomer 1289725
+- name: popitka nomer 1289738
   hosts: all
   become: yes
 
@@ -18,6 +18,14 @@
       shell: |
         setenforce 0
         sed -i 's/enforcing/disabled/g' /etc/selinux/config /etc/selinux/config
+
+
+    - name: Stop and disable firewalld.
+      service:
+        name: firewalld
+        state: stopped
+        enabled: False
+
 
     - name: add directory
       file:
