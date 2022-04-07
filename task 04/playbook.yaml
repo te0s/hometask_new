@@ -1,22 +1,110 @@
 ---
-- name: jast do it
-  hosts: all
+- name: Configure master
+  hosts: master
   become: yes
+  tasks: 
+    - name: Install Server Puppet
+      shell: yum install -y puppetserver git 
 
 
+    - name: Create a directory r10k
+      file:
+        path: /etc/puppetlabs/r10k
+        state: directory
+        mode: '0775'
 
+    - name: Touch /etc/puppetlabs/r10k/r10k.yaml
+      file:
+        path: /etc/puppetlabs/r10k/r10k.yaml
+        state: touch
 
-  tasks:
-    - name: install packages
-      dnf:
-        pkg:
-         - nano
-         - mc
-         - httpd
-         - php
+    - name: add config r10k
+      blockinfile:
+        path: /etc/puppetlabs/r10k/r10k.yaml
+        block: |
+          ---
+          :cachedir: '/var/cache/r10k'
+          :sources:
+            :my-org:
+              remote: 'https://github.com/te0s/puppet.git'
+              basedir: '/etc/puppetlabs/code/environments'
 
-    - name: disable SELinux
+    - name: Create a directory /var/cache/r10k if it does not exist
+      file:
+        path: /var/cache/r10k
+        state: directory
+        mode: '0775'
+
+    - name: install gem r10k
       shell: |
-        setenforce 0
-        sed -i 's/enforcing/disabled/g' /etc/selinux/config /etc/selinux/config
-        
+        /opt/puppetlabs/puppet/bin/gem install r10k
+        /opt/puppetlabs/puppet/bin/r10k deploy environment -p
+    
+    - name: Change Ram
+      become: yes
+      replace:
+        path: /etc/sysconfig/puppetserver
+        regexp: 'JAVA_ARGS="-Xms2g -Xmx2g'
+        replace: 'JAVA_ARGS="-Xms256m -Xmx256m'
+
+    - name: ADD hosts
+      lineinfile:
+        path: /etc/hosts
+        line: "{{item}}"
+      with_items:
+         - '192.168.1.100 master.puppet'
+         - '192.168.1.101 slave1.puppet'
+         - '192.168.1.102 slave2.puppet'
+
+    - name: ADD host puppetserver
+      lineinfile:
+        path: /etc/puppetlabs/puppet/puppet.conf
+        line: "{{item}}"
+      with_items:
+         - server = master.puppet
+         - autosign = true 
+              
+    - name: Enable Puppet
+      systemd:
+        name: puppetserver
+        enabled: yes
+        state: started
+
+    - name: Start Puppet
+      systemd:
+        state: started
+        name: puppetserver
+
+- name: Install soft slave 
+  hosts: slave
+  become: yes
+  tasks: 
+
+    - name: Install Puppet agent
+      shell: yum install -y puppet-agent
+
+    - name: ADD hosts
+      lineinfile:
+        path: /etc/hosts
+        line: '192.168.1.100 master.puppet puppet'
+   
+    - name: Make connect to puppet-server
+      lineinfile:
+        path: /etc/puppetlabs/puppet/puppet.conf
+        line: "{{item}}"
+      with_items:
+         - '[agent]'
+         - 'server = master.puppet' 
+         - 'runinterval = 1m'
+
+    - name: Enable Puppet
+      systemd:
+        name: puppet
+        enabled: yes
+        state: started
+
+    - name: Restart Puppet
+      systemd:
+        state: restarted
+        daemon_reload: yes
+        name: puppet
