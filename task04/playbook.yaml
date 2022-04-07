@@ -52,9 +52,9 @@
         path: /etc/hosts
         line: "{{item}}"
       with_items:
-         - '192.168.1.100 master.puppet'
-         - '192.168.1.101 slave1.puppet'
-         - '192.168.1.102 slave2.puppet'
+         - '192.168.33.100 master.puppet'
+         - '192.168.33.101 slave1.puppet'
+         - '192.168.33.102 slave2.puppet'
 
     - name: ADD host puppetserver
       lineinfile:
@@ -86,7 +86,7 @@
     - name: ADD hosts
       lineinfile:
         path: /etc/hosts
-        line: '192.168.1.100 master.puppet puppet'
+        line: '192.168.33.100 master.puppet puppet'
    
     - name: Make connect to puppet-server
       lineinfile:

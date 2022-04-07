@@ -1,10 +1,10 @@
 
 [master]
-master.puppet ansible_host=192.168.1.100 ansible_connection=local
+master.puppet ansible_host=192.168.33.100 ansible_connection=local
 
 [slave]
-slave1.puppet ansible_host=192.168.1.101 ansible_ssh_user=vagrant ansible_ssh_private_key_file=/home/vagrant/private_key_slave1
-slave2.puppet ansible_host=192.168.1.102 ansible_ssh_user=vagrant ansible_ssh_private_key_file=/home/vagrant/private_key_slave2
+slave1.puppet ansible_host=192.168.33.101 ansible_ssh_user=vagrant ansible_ssh_private_key_file=/home/vagrant/private_key_slave1
+slave2.puppet ansible_host=192.168.33.102 ansible_ssh_user=vagrant ansible_ssh_private_key_file=/home/vagrant/private_key_slave2
 
 [slave:vars]
 ansible_connection=ssh
