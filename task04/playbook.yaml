@@ -75,6 +75,12 @@
         state: started
         name: puppetserver
 
+    - name: Stop and disable firewalld.
+      service:
+        name: firewalld
+        state: stopped
+        enabled: False
+
 - name: Install soft slave 
   hosts: slave
   become: yes
