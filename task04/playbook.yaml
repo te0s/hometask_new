@@ -3,10 +3,6 @@
   become: true
   tasks:
 
-    - name: Off SeLinux
-      selinux:
-      state: disabled 
-
     - name: Add Puppet repo
       yum:
         name: https://yum.puppet.com/puppet7-release-el-8.noarch.rpm
@@ -17,6 +13,8 @@
         name: firewalld
         state: stopped
 
+    - name: Set timezone Europe/Minsk
+      command: /usr/bin/timedatectl set-timezone Europe/Minsk
 
 - name: Configure master
   hosts: master
