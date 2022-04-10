@@ -1,11 +1,34 @@
 ---
+- hosts: all
+  become: true
+  tasks:
+
+    - name: Off SeLinux
+      selinux:
+      state: disabled 
+
+    - name: Add Puppet repo
+      yum:
+        name: https://yum.puppet.com/puppet7-release-el-8.noarch.rpm
+        disable_gpg_check: yes
+
+    - name: Stop firewall
+      service:
+        name: firewalld
+        state: stopped
+
+
 - name: Configure master
   hosts: master
   become: yes
   tasks: 
-    - name: Install Server Puppet
-      shell: yum install -y puppetserver git 
 
+    - name: Install a list of packages 
+      yum:
+       name:
+        - puppetserver
+        - git
+       state: present
 
     - name: Create a directory r10k
       file:
