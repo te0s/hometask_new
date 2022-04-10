@@ -4,7 +4,7 @@
   tasks:
 
     - name: Add Puppet repo
-      yum:
+      dnf:
         name: https://yum.puppet.com/puppet7-release-el-8.noarch.rpm
         disable_gpg_check: yes
 
@@ -22,7 +22,7 @@
   tasks: 
 
     - name: Install a list of packages 
-      yum:
+      dnf:
        name:
         - puppetserver
         - git
@@ -106,8 +106,10 @@
   become: yes
   tasks: 
 
-    - name: Install Puppet agent
-      shell: yum install -y puppet-agent
+    - name: install 
+      dnf:
+       name: puppet-agent
+       state: latest
 
     - name: ADD hosts
       lineinfile:
