@@ -49,7 +49,6 @@
             :my-org:
               remote: 'https://github.com/te0s/puppet.git'
               basedir: '/etc/puppetlabs/code/environments'
-
     - name: Create a directory /var/cache/r10k if it does not exist
       file:
         path: /var/cache/r10k
