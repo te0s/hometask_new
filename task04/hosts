@@ -1,4 +1,3 @@
-
 [master]
 master.puppet ansible_host=192.168.33.100 ansible_connection=local
 

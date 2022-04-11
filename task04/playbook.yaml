@@ -16,6 +16,13 @@
     - name: Set timezone Europe/Minsk
       command: /usr/bin/timedatectl set-timezone Europe/Minsk
 
+    - name: Install a list of packages 
+      dnf:
+       name:
+        - mc
+        - nano
+       state: present      
+
 - name: Configure master
   hosts: master
   become: yes
