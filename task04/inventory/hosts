@@ -1,5 +1,5 @@
 [master]
-master.puppet ansible_host=192.168.33.100 
+localhost ansible_connection=local
 
 [slave]
 slave1.puppet ansible_host=192.168.33.101 
