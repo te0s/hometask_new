@@ -64,8 +64,8 @@
 
     - name: install gem r10k
       shell: |
-        /opt/puppetlabs/puppet/bin/gem install r10k
-        /opt/puppetlabs/puppet/bin/r10k deploy environment -p
+        sudo /opt/puppetlabs/puppet/bin/gem install r10k
+        sudo /opt/puppetlabs/puppet/bin/r10k deploy environment -p
     
     - name: Change Ram
       become: yes
