@@ -3,7 +3,10 @@ localhost ansible_connection=local
 
 [slave]
 slave1.puppet ansible_host=192.168.56.101 
-slave2.puppet ansible_host=192.168.56.102 
+slave2.puppet ansible_host=192.168.56.102
+
+[mine]
+mineserver.puppet ansible_host=192.168.56.103 
 
 [all:vars]
 ansible_ssh_common_args='-o StrictHostKeyChecking=no'
