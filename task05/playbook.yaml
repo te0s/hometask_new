@@ -82,6 +82,7 @@
          - '192.168.56.100 master.puppet'
          - '192.168.56.101 slave1.puppet'
          - '192.168.56.102 slave2.puppet'
+         - '192.168.56.103 mineserver.puppet'
 
     - name: ADD host puppetserver
       lineinfile:
@@ -110,6 +111,43 @@
 
 - name: Install soft slave 
   hosts: slave
+  become: yes
+  tasks: 
+
+    - name: install 
+      dnf:
+       name: puppet-agent
+       state: latest
+
+    - name: ADD hosts
+      lineinfile:
+        path: /etc/hosts
+        line: '192.168.56.100 master.puppet puppet'
+   
+    - name: Make connect to puppet-server
+      lineinfile:
+        path: /etc/puppetlabs/puppet/puppet.conf
+        line: "{{item}}"
+      with_items:
+         - '[agent]'
+         - 'server = master.puppet' 
+         - 'runinterval = 1m'
+
+    - name: Enable Puppet
+      systemd:
+        name: puppet
+        enabled: yes
+        state: started
+
+    - name: Restart Puppet
+      systemd:
+        state: restarted
+        daemon_reload: yes
+        name: puppet
+
+
+- name: Install soft mineserver 
+  hosts: mine
   become: yes
   tasks: 
 
