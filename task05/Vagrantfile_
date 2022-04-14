@@ -1,0 +1,51 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure("2") do |config|
+  config.vm.box = "centos/8"
+
+  config.vm.define "node0" do |node|
+    node.vm.network "private_network", ip: "192.168.33.9"
+  end
+
+  config.vm.define "node1" do |node|
+    node.vm.network "private_network", ip: "192.168.33.10"
+  end
+
+  config.vm.define "node2" do |node|
+    node.vm.network "private_network", ip: "192.168.33.11"
+
+    # Копируем внутрь хоста приватные ключи от других серверов
+    # Они понадобятся для подключения ansible
+    node.vm.provision :file, source: '.vagrant/machines/node0/virtualbox/private_key', destination: '/home/vagrant/private_key_node0'
+    node.vm.provision :file, source: '.vagrant/machines/node1/virtualbox/private_key', destination: '/home/vagrant/private_key_node1'
+
+    # Альтернативный (без использования Ansible) способ решить проблему с правами файлов ключей
+    #node.vm.provision :shell, inline: <<-SHELL
+    #  sudo chmod 0600 /home/vagrant/private_key_node0
+    #  sudo chmod 0600 /home/vagrant/private_key_node1
+    #SHELL
+
+    # Этот provision будет выполняться внутри node2, но его изменения будут применены
+    #   для всех хостов, упомянутых в инвентаре
+    # Обратите внимание, что для корректной работы понадобится конфигурационный файл
+    #   ansible.conf, в котором отключается верификация хостов по ключам
+    node.vm.provision :ansible_local do |ansible|
+      # Имя файла сценария
+      ansible.playbook          = "playbook.yaml"
+
+      # Именно этот параметр ограничивает, какие хосты из inventory доступны для
+      #   выполнения сценария
+      ansible.limit             = "all"
+
+      # Имя файла инвентаря
+      ansible.inventory_path    = "inventory"
+    end
+  end
+end
+
+  config.vm.provision "ansible_local" do |ansible|
+    ansible.playbook = 'playbook.yaml'
+    ansible.become = true
+    ansible.inventory_path = "inventory/hosts"
+  end
