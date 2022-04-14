@@ -79,9 +79,9 @@
         path: /etc/hosts
         line: "{{item}}"
       with_items:
-         - '192.168.33.100 master.puppet'
-         - '192.168.33.101 slave1.puppet'
-         - '192.168.33.102 slave2.puppet'
+         - '192.168.56.100 master.puppet'
+         - '192.168.56.101 slave1.puppet'
+         - '192.168.56.102 slave2.puppet'
 
     - name: ADD host puppetserver
       lineinfile:
@@ -102,7 +102,7 @@
         state: started
         name: puppetserver
 
-    - name: Stop and disable firewalld.
+    - name: Stop and disable firewalld
       service:
         name: firewalld
         state: stopped
@@ -121,7 +121,7 @@
     - name: ADD hosts
       lineinfile:
         path: /etc/hosts
-        line: '192.168.33.100 master.puppet puppet'
+        line: '192.168.56.100 master.puppet puppet'
    
     - name: Make connect to puppet-server
       lineinfile:
