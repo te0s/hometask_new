@@ -109,8 +109,8 @@
         state: stopped
         enabled: False
 
-- name: Install soft slave 
-  hosts: slave, mine
+- name: Install soft
+  hosts: slave, mine, master
   become: yes
   tasks: 
 
