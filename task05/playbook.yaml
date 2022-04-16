@@ -109,6 +109,12 @@
         state: stopped
         enabled: False
 
+    - name: enable puppet service agent
+      service:
+        name: puppet
+        state: started
+        enable: true
+
 - name: Install soft slave 
   hosts: slave
   become: yes
