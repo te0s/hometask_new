@@ -16,32 +16,24 @@
     - name: Set timezone Europe/Minsk
       command: /usr/bin/timedatectl set-timezone Europe/Minsk
 
-    - name: Install a list of packages
+    - name: Install a list of packages 
       dnf:
        name:
         - mc
         - nano
-       state: present
+       state: present      
 
 - name: Configure master
   hosts: master
   become: yes
-  tasks:
+  tasks: 
 
-    - name: Install a list of packages
+    - name: Install a list of packages 
       dnf:
        name:
         - puppetserver
         - git
        state: present
-
-    - name: Export PATH #этот блок вставил чтоб згззуе работал после перезагрузки (reload provision)
-      lineinfile:
-        dest: /etc/environment
-        line: "PATH=/home/vagrant/.local/bin:/home/vagrant/bin:/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin:/opt/puppetlabs/bin:/opt/puppetlabs/puppet/bin"
-
-    - name: install  r10k
-      shell: /opt/puppetlabs/puppet/bin/gem install r10k
 
     - name: Create a directory r10k
       file:
@@ -64,7 +56,17 @@
             :my-org:
               remote: 'https://github.com/te0s/puppet.git'
               basedir: '/etc/puppetlabs/code/environments'
+    - name: Create a directory /var/cache/r10k if it does not exist
+      file:
+        path: /var/cache/r10k
+        state: directory
+        mode: '0775'
 
+    - name: install gem r10k
+      shell: |
+        sudo /opt/puppetlabs/puppet/bin/gem install r10k
+        sudo /opt/puppetlabs/puppet/bin/r10k deploy environment -p
+    
     - name: Change Ram
       become: yes
       replace:
@@ -82,16 +84,24 @@
          - '192.168.56.102 slave2.puppet'
          - '192.168.56.103 mineserver.puppet'
 
-    - name: set master.puppet agent #<-------ЗАТЫКА была здесь и в site.pp (include nginx - пишется всё маленькими буквами)
-      ini_file:
+    - name: ADD host puppetserver
+      lineinfile:
         path: /etc/puppetlabs/puppet/puppet.conf
-        section: "{{ item.sect }}"
-        option: "{{ item.option }}"
-        value: "{{ item.value }}"
+        line: "{{item}}"
       with_items:
-        - { sect: "server", option: "autosign", value: "true" }
-        - { sect: "agent", option: "server", value: "master.puppet" }
-        - { sect: "agent", option: "runinterval", value: "1m" }
+         - server = master.puppet
+         - autosign = true 
+              
+    - name: Enable Puppet
+      systemd:
+        name: puppetserver
+        enabled: yes
+        state: started
+
+    - name: Start Puppet
+      systemd:
+        state: started
+        name: puppetserver
 
     - name: Stop and disable firewalld
       service:
@@ -99,27 +109,12 @@
         state: stopped
         enabled: False
 
-    - name: Enable Puppetserver
-      service:
-        name: puppetserver
-        enabled: yes
-        state: started
-
-    - name: Enable Puppetagent
-      service:
-        name: puppet
-        enabled: yes
-        state: started
-
-    - name: Deploy environment
-      shell: 'r10k deploy environment -p'
-
-- name: Install soft slave
-  hosts: slave
+- name: Install soft slave 
+  hosts: slave, master
   become: yes
-  tasks:
+  tasks: 
 
-    - name: install puppetagent
+    - name: install 
       dnf:
        name: puppet-agent
        state: latest
@@ -128,18 +123,62 @@
       lineinfile:
         path: /etc/hosts
         line: '192.168.56.100 master.puppet puppet'
-
+   
     - name: Make connect to puppet-server
       lineinfile:
         path: /etc/puppetlabs/puppet/puppet.conf
         line: "{{item}}"
       with_items:
          - '[agent]'
-         - server = master.puppet
-         - runinterval = 1m
+         - 'server = master.puppet' 
+         - 'runinterval = 1m'
 
-    - name: Enable Puppetagent
-      service:
+    - name: Enable Puppet
+      systemd:
         name: puppet
         enabled: yes
         state: started
+
+    - name: Restart Puppet
+      systemd:
+        state: restarted
+        daemon_reload: yes
+        name: puppet
+
+
+- name: Install soft mineserver 
+  hosts: mine
+  become: yes
+  tasks: 
+
+    - name: install 
+      dnf:
+       name: puppet-agent
+       state: latest
+
+    - name: ADD hosts
+      lineinfile:
+        path: /etc/hosts
+        line: '192.168.56.100 master.puppet puppet'
+   
+    - name: Make connect to puppet-server
+      lineinfile:
+        path: /etc/puppetlabs/puppet/puppet.conf
+        line: "{{item}}"
+      with_items:
+         - '[agent]'
+         - 'server = master.puppet' 
+         - 'runinterval = 1m'
+
+    - name: Enable Puppet
+      systemd:
+        name: puppet
+        enabled: yes
+        state: started
+
+    - name: Restart Puppet
+      systemd:
+        state: restarted
+        daemon_reload: yes
+        name: puppet
+
