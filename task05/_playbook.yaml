@@ -1,0 +1,205 @@
+---
+- hosts: all
+  become: true
+  tasks:
+
+    - name: Add Puppet repo
+      dnf:
+        name: https://yum.puppet.com/puppet7-release-el-8.noarch.rpm
+        disable_gpg_check: yes
+
+    - name: Stop firewall
+      service:
+        name: firewalld
+        state: stopped
+
+    - name: SElinux stop 
+      selinux:
+        policy: targeted
+        state: permissive
+
+    - name: Set timezone Europe/Minsk
+      command: /usr/bin/timedatectl set-timezone Europe/Minsk
+
+    - name: Install a list of packages 
+      dnf:
+       name:
+        - mc
+        - nano
+       state: present      
+
+- name: Configure master
+  hosts: master
+  become: yes
+  tasks: 
+
+    - name: Install a list of packages 
+      dnf:
+       name:
+        - puppetserver
+        - git
+       state: present
+
+    - name: Create a directory r10k
+      file:
+        path: /etc/puppetlabs/r10k
+        state: directory
+        mode: '0775'
+
+    - name: Touch /etc/puppetlabs/r10k/r10k.yaml
+      file:
+        path: /etc/puppetlabs/r10k/r10k.yaml
+        state: touch
+
+    - name: add config r10k
+      blockinfile:
+        path: /etc/puppetlabs/r10k/r10k.yaml
+        block: |
+          ---
+          :cachedir: '/var/cache/r10k'
+          :sources:
+            :my-org:
+              remote: 'https://github.com/te0s/puppet.git'
+              basedir: '/etc/puppetlabs/code/environments'
+    - name: Create a directory /var/cache/r10k if it does not exist
+      file:
+        path: /var/cache/r10k
+        state: directory
+        mode: '0775'
+
+    - name: install gem r10k
+      shell: |
+        sudo /opt/puppetlabs/puppet/bin/gem install r10k
+        sudo /opt/puppetlabs/puppet/bin/r10k deploy environment -p
+    
+    - name: ADD hosts
+      lineinfile:
+        path: /etc/hosts
+        line: "{{item}}"
+      with_items:
+         - '192.168.56.100 master.puppet'
+         - '192.168.56.101 slave1.puppet'
+         - '192.168.56.102 slave2.puppet'
+         - '192.168.56.103 mineserver.puppet'
+
+    - name: ADD host puppetserver
+      lineinfile:
+        path: /etc/puppetlabs/puppet/puppet.conf
+        line: "{{item}}"
+      with_items:
+         - server = master.puppet
+         - autosign = true 
+              
+    - name: Enable Puppet
+      systemd:
+        name: puppetserver
+        enabled: yes
+        state: started
+
+    - name: Start Puppet
+      systemd:
+        state: started
+        name: puppetserver
+
+    - name: Stop and disable firewalld
+      service:
+        name: firewalld
+        state: stopped
+        enabled: False
+
+    - name: add ti cron
+      cron:
+        name: r01k autoupdate
+        minute: "*/2"
+        user: root
+        job: "/opt/puppetlabs/puppet/bin/r10k deploy environment -p"
+
+    - name: Enable puppeе service agent
+      service:
+        name: puppet
+        state: started
+        enabled: true
+
+    - name: Make connect to puppet-server
+      lineinfile:
+        path: /etc/puppetlabs/puppet/puppet.conf
+        line: "{{item}}"
+      with_items:
+         - '[agent]'
+         - 'server = master.puppet' 
+         - 'runinterval = 1m'
+
+
+- name: Install soft slave 
+  hosts: slave
+  become: yes
+  tasks: 
+
+    - name: install 
+      dnf:
+       name: puppet-agent
+       state: latest
+
+    - name: ADD hosts
+      lineinfile:
+        path: /etc/hosts
+        line: '192.168.56.100 master.puppet puppet'
+   
+    - name: Make connect to puppet-server
+      lineinfile:
+        path: /etc/puppetlabs/puppet/puppet.conf
+        line: "{{item}}"
+      with_items:
+         - '[agent]'
+         - 'server = master.puppet' 
+         - 'runinterval = 1m'
+
+    - name: Enable Puppet
+      systemd:
+        name: puppet
+        enabled: yes
+        state: started
+
+    - name: Restart Puppet
+      systemd:
+        state: restarted
+        daemon_reload: yes
+        name: puppet
+
+
+- name: Install soft mineserver 
+  hosts: mine
+  become: yes
+  tasks: 
+
+    - name: install 
+      dnf:
+       name: puppet-agent
+       state: latest
+
+    - name: ADD hosts
+      lineinfile:
+        path: /etc/hosts
+        line: '192.168.56.100 master.puppet puppet'
+   
+    - name: Make connect to puppet-server
+      lineinfile:
+        path: /etc/puppetlabs/puppet/puppet.conf
+        line: "{{item}}"
+      with_items:
+         - '[agent]'
+         - 'server = master.puppet' 
+         - 'runinterval = 1m'
+
+    - name: Enable Puppet
+      systemd:
+        name: puppet
+        enabled: yes
+        state: started
+
+    - name: Restart Puppet
+      systemd:
+        state: restarted
+        daemon_reload: yes
+        name: puppet
+
