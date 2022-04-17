@@ -115,7 +115,7 @@
       shell: 'r10k deploy environment -p'
 
 - name: Install soft slave
-  hosts: slave
+  hosts: slave, mine
   become: yes
   tasks:
 
