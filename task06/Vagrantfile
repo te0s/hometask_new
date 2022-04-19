@@ -14,26 +14,27 @@ Vagrant.configure("2") do |config|
     shell
   
     
-    config.vm.define "slave1.puppet" do |slave|
+    config.vm.define "nexus.vm" do |slave|
       slave.vm.network "private_network", ip: "192.168.56.101"
       slave.vm.network "forwarded_port", guest: 80, host: 8080
-      slave.vm.hostname = "slave1.puppet"   
+      slave.vm.hostname = "nexus.vm"   
     end
   
-    config.vm.define "slave2.puppet" do |slave|
+    config.vm.define "staging.vm" do |slave|
       slave.vm.network "private_network", ip: "192.168.56.102"
       slave.vm.network "forwarded_port", guest: 81, host: 8081      
-      slave.vm.hostname = "slave2.puppet"
+      slave.vm.hostname = "staging.vm"
+    end   
+    
+    config.vm.define "production.vm" do |slave|
+      slave.vm.network "private_network", ip: "192.168.56.102"
+      slave.vm.network "forwarded_port", guest: 81, host: 8081      
+      slave.vm.hostname = "sproduction.vm"
     end   
   
-    config.vm.define "mineserver.puppet" do |mine|
-      mine.vm.network "private_network", ip: "192.168.56.103"
-      mine.vm.hostname = "mineserver.puppet"
-    end 
-  
-    config.vm.define "master.puppet" do |master|
+    config.vm.define "jenkins.vm" do |master|
       master.vm.network "private_network", ip: "192.168.56.100"
-      master.vm.hostname = "master.puppet"
+      master.vm.hostname = "jenkins.vm"
         
       master.vm.provision "ansible_local" do |ansible|
         ansible.playbook = "playbook.yaml"
