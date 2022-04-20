@@ -2,3 +2,26 @@
 - name: install jenkins
   hosts: master
   become: yes
+
+  vars:
+    jenkins_hostname: localhost
+    jenkins_admin_username: admin
+    jenkins_admin_password: admin
+    jenkins_java_options: "-Djenkins.install.runSetupWizard=false -Dhudson.security.csrf.DefaultCrumbIssuer.EXCLUDE_SESSION_ID=true"
+    jenkins_plugin_timeout: 300
+    jenkins_plugins:
+      - git
+      - github
+      - nexus-artifact-uploader
+      - golang
+      - ssh
+    jenkins_plugins_install_dependencies: true
+  pre_tasks:
+    - apt:
+        pkg:
+        - mc
+        - nano
+        - git
+        - build-essential
+        - jq
+        state: present
