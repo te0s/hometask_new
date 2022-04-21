@@ -1,0 +1,50 @@
+---
+
+# If defined and set to True, it skips the restart handler
+# systemd_restart_disabled:
+
+systemd_service: {}
+systemd_target: {}
+
+#
+# systemd_service:
+#   service_name:
+#     enabled: False
+#     description: "Service for {{ item.key }}"
+#     after: ""
+#     before: ""
+#     user: ""
+#     group: ""
+#     type: ""
+#     pid_file: ""
+#     oom_score_adjust: ""
+#     nice: ""
+#     exec_start: ""
+#     exec_start_pre: ""
+#     exec_start_post: ""
+#     exec_stop: ""
+#     exec_stop_post: ""
+#     exec_reload: ""
+#     restart: ""
+#     restart_sec: ""
+#     timeout_sec: 30
+#     wants: ""
+#     requires: ""
+#     environment: []
+#     environment_file: ""
+#     working_directory: ""
+#     standard_input: ""
+#     standard_output: ""
+#     standard_error: ""
+#     wanted_by: ""
+#     required_by: ""
+#
+# systemd_target:
+#   target_name:
+#     description: ""
+#     requires: []
+#     before: ""
+#     after: ""
+#     default_dependencies: True
+#     allow_isolate: False
+#

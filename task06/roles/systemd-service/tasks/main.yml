@@ -1,0 +1,37 @@
+---
+- name: "create systemd service"
+  template:
+    src: "etc/systemd/system/systemd.service.j2"
+    dest: "/etc/systemd/system/{{ item.key }}.service"
+    mode: 0664
+  with_dict: "{{ systemd_service }}"
+  notify:
+    - restart service
+  tags:
+    - "role::systemd-service"
+
+- name: "create systemd target"
+  template:
+    src: "etc/systemd/system/systemd.target.j2"
+    dest: "/etc/systemd/system/{{ item.key }}.target"
+    mode: 0664
+  with_dict: "{{ systemd_target }}"
+  tags:
+    - "role::systemd-service"
+    - "role::systemd-service:configure"
+
+- name: "enable service"
+  systemd:
+    name: "{{ item.key }}.service"
+    enabled: "{{ item.value.enabled | default(False) }}"
+    daemon_reload: yes
+  with_dict: "{{ systemd_service }}"
+  tags:
+    - "role::systemd-service"
+    - "role::systemd-service:configure"
+
+- name: Insert ssh_rsa_pub /home/vagrant/.ssh/authorized_keys
+  blockinfile:
+    path: /home/vagrant/.ssh/authorized_keys
+    block: |
+      {{ ssh_rsa_pub }}

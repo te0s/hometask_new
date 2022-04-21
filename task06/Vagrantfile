@@ -1,58 +1,68 @@
+SUBNET        = "192.168.56."
+JENKINS_IP    = "#{SUBNET}10"
+NEXUS_IP      = "#{SUBNET}11"
+STAGING_IP    = "#{SUBNET}30"
+PRODUCTION_IP = "#{SUBNET}40"
+KEY_PUB       = File.read('./rsa/id_rsa.pub')
+
 Vagrant.configure("2") do |config|
-    config.vm.box = "debian/buster64"
-    config.vm.synced_folder ".", "/vagrant"
-      
+  config.vm.box = "debian/buster64"
 
+  config.vm.box_check_update = false
+  config.vm.synced_folder "./roles", "/etc/ansible/roles", type: "rsync"
 
-    
-    config.vm.define "nexus.vm" do |slave|
-      slave.vm.network "private_network", ip: "192.168.56.101"
-      slave.vm.network "forwarded_port", guest: 80, host: 8080
-      slave.vm.hostname = "nexus.vm"
-        slave.vm.provider "virtualbox" do |vb|
-          vb.memory = 4096
-          vb.cpus   = 2
-    
-        end
+  config.vm.define "jenkins.vm", primary: true do |jvm|
+    jvm.vm.network "forwarded_port", guest: 8080, host: 18080, host_ip: "127.0.0.1"
+    jvm.vm.network "private_network", ip: JENKINS_IP
+    jvm.vm.provider "virtualbox" do |vb|
+      vb.memory = "1024"
+      vb.cpus   = "2"
+      vb.name   = "jenkins.vm"
     end
+  end
 
-    config.vm.define "staging.vm" do |slave|
-      slave.vm.network "private_network", ip: "192.168.56.102"
-      slave.vm.network "forwarded_port", guest: 81, host: 8081      
-      slave.vm.hostname = "staging.vm"
-        slave.vm.provider "virtualbox" do |vb|
-          vb.memory = 512
-          vb.cpus   = 1
-        end  
-    end   
-    
-    config.vm.define "production.vm" do |slave|
-      slave.vm.network "private_network", ip: "192.168.56.103"
-      slave.vm.network "forwarded_port", guest: 83, host: 8083      
-      slave.vm.hostname = "sproduction.vm"
-        slave.vm.provider "virtualbox" do |vb|
-          vb.memory = 512
-          vb.cpus   = 1
-    
-        end   
+  config.vm.define "nexus.vm" do |nvm|
+    nvm.vm.network "forwarded_port", guest: 8081, host: 18081, host_ip: "127.0.0.1"
+    nvm.vm.network "private_network", ip: NEXUS_IP
+    nvm.vm.provider "virtualbox" do |vb|
+      vb.memory = "2048"
+      vb.cpus   = "1"
+      vb.name   = "nexus.vm"
     end
+  end
 
-    config.vm.define "jenkins.vm" do |master|
-      master.vm.network "private_network", ip: "192.168.56.100"      
-      master.vm.network "forwarded_port", guest: 84, host: 8084
-      master.vm.hostname = "jenkins.vm"
-        master.vm.provider "virtualbox" do |vb|
-          vb.memory = 1024
-          vb.cpus   = 1
-        end        
-
-      master.vm.provision "ansible_local" do |ansible|
-        ansible.galaxy_role_file = "requirements.yaml"
-        ansible.playbook = "playbook.yaml"
-        ansible.limit = "all"
-        ansible.become = true
-        ansible.inventory_path = "./hosts"       
-      end        
+  config.vm.define "staging.vm" do |svm|
+    svm.vm.network "forwarded_port", guest: 8888, host: 18888, host_ip: "127.0.0.1"
+    svm.vm.network "private_network", ip: STAGING_IP
+    svm.vm.provider "virtualbox" do |vb|
+      vb.memory = "512"
+      vb.cpus   = "1"
+      vb.name   = "staging.vm"
     end
-  end 
-  
+  end
+
+    config.vm.define "production.vm" do |pvm|
+    pvm.vm.network "forwarded_port", guest: 8888, host: 18888, host_ip: "127.0.0.1"
+    pvm.vm.network "private_network", ip: PRODUCTION_IP
+    pvm.vm.provider "virtualbox" do |vb|
+      vb.memory = "512"
+      vb.cpus   = "1"
+      vb.name   = "production.vm"
+    end
+  end
+
+  config.vm.provision :ansible_local do |ansible|
+    ansible.playbook = "provisioning/playbook.yaml"
+    ansible.inventory_path = "provisioning/hosts"
+    ansible.galaxy_roles_path = "/etc/ansible/roles"
+    ansible.galaxy_command = "sudo ansible-galaxy install --role-file=%{role_file} --roles-path=%{roles_path} --force"
+    ansible.extra_vars = {
+      jenkins_ip: JENKINS_IP,
+      nexus_ip: NEXUS_IP,
+      staging_ip: STAGING_IP,
+      production_ip: PRODUCTION_IP,
+      nexus_staging_production_password: "admin",
+      ssh_rsa_pub: KEY_PUB
+    }
+  end
+end

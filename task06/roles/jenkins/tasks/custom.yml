@@ -1,0 +1,48 @@
+---
+- name: Stop jenkins
+  service: name=jenkins state=stopped
+
+- name: Create directory.
+  file:
+    path: "{{ item.dest }}"
+    state: directory
+    owner: "{{ jenkins_process_user }}"
+    group: "{{ jenkins_process_group }}"
+    mode: 0775
+  loop: "{{ jenkins_folders }}"
+  when: jenkins_folders is defined
+
+- name: configure plugins and jobs
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    owner: "{{ jenkins_process_user }}"
+    group: "{{ jenkins_process_group }}"
+    mode: 0775
+    backup: yes
+  loop: "{{ jenkins_files }}"
+  when: jenkins_files is defined
+
+- name: restart jenkins
+  service: name=jenkins state=restarted
+
+# - name: Remove old key.
+#   file:
+#     path: "{{ jenkins_ssl_key_path }}{{ jenkins_ssl_key_file }}"
+#     state: absent
+
+# - name: Remove old public key.
+#   file:
+#     path: "{{ jenkins_ssl_key_path }}{{ jenkins_ssl_key_file }}.pub"
+#     state: absent
+
+# - name: Create ssl keypair
+#   command: >
+#     sudo -u jenkins ssh-keygen -m PEM -b 4096 -t rsa -N "" -f {{ jenkins_ssl_key_path }}{{ jenkins_ssl_key_file }}
+
+# - name: define ssl_public_key
+#   command: >
+#     sudo -u jenkins cat {{ jenkins_ssl_key_path }}{{ jenkins_ssl_key_file }}.pub
+#   register: ssl_public_key
+
+# - debug: msg="{{ ssl_public_key.stdout }}"

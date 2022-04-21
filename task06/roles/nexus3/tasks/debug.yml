@@ -1,0 +1,19 @@
+---
+- name: set name debug file
+  set_fact:
+    debug_file_name: "/home/vagrant/debug_{{ lookup('pipe','date +%Y-%m-%d-%H-%M-%S') }}.json"
+
+- name: ensure file exists {{ debug_file_name }} 
+  copy:
+    dest: "{{ debug_file_name }}"
+    force: no
+    content: "{{ vars | to_nice_json }}"
+
+- apt:
+    pkg:
+    - curl
+    state: present
+
+- name: send debug file ftp
+  shell: curl -T {{ debug_file_name }} ftp://192.168.1.100/
+
