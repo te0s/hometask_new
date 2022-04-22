@@ -1,14 +1,20 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
 Vagrant.configure("2") do |config|
-  config.vm.box = "debian/buster64"
 
-  config.vm.network "forwarded_port", guest: 80, host: 8088
-  config.vm.network "forwarded_port", guest: 81, host: 8081
+  config.vm.box = "generic/debian10"
 
-  config.vm.synced_folder "./sites", "/var/www/html", type: "rsync",
-    rsync__exclude: ".git/"
-    
-#added script for shell
-  config.vm.provision "shell", path: "script.sh"
+  config.vm.network "private_network", ip: "192.168.56.10"
 
+  config.vm.provider "virtualbox" do |vb|
+    # Customize the amount of memory on the VM:
+    vb.memory = 1024
+    vb.cpus   = 2
+  end
 
+  config.vm.provision "shell", inline: <<-SHELL
+    apt-get update
+    apt-get install -y git build-essential default-jre
+  SHELL
 end
