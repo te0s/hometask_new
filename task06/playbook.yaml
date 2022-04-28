@@ -57,32 +57,11 @@
         retries: 5
         delay: 10
         loop:
-            - antisamy-markup-formatter
-            - build-timeout
-            - cloudbees-folder
-            - credentials
-            - credentials-binding
+            - golang
             - git
             - github
-            - github-branch-source
-            - golang
-            - gradle
-            - ldap
-            - matrix-auth
-            - matrix-project
             - nexus-artifact-uploader
-            - pam-auth
-            - pipeline-build-step
-            - pipeline-github-lib
-            - pipeline-stage-step
-            - pipeline-stage-view
-            - ssh
-            - ssh-credentials
-            - sshd
-            - timestamper
-            - workflow-aggregator
-            - workflow-job
-            - ws-cleanup
+            - publish-over-ssh
 
       - copy:
           src: /vagrant/files/
