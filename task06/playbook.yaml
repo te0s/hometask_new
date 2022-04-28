@@ -1,0 +1,216 @@
+---
+  - name: Jenkins setup
+    hosts: jenkins
+    become: true
+    tasks: 
+      - name: install essential packages
+        apt:
+          pkg:
+            - git
+            - build-essential
+            - default-jre
+            - jq
+            - mc
+          state: present
+          update_cache: true
+
+      - name: Add Jenkins key
+        apt_key:
+          url: "https://pkg.jenkins.io/debian-stable/jenkins.io.key"
+          state: present
+
+      - name: Add Jenkins repository
+        apt_repository:
+          repo: 'deb https://pkg.jenkins.io/debian-stable binary/'
+          state: present
+
+      - name: Install Jenkins binary package
+        apt:
+          name: jenkins
+          state: present
+          update_cache: true
+
+      - name: some necessary magic
+        lineinfile:
+          dest=/etc/default/jenkins
+          regexp='^JAVA_ARGS='
+          line='JAVA_ARGS="-Djenkins.install.runSetupWizard=false -Dhudson.security.csrf.DefaultCrumbIssuer.EXCLUDE_SESSION_ID=true"'
+
+      - name: Jenkins is restarted
+        service:
+          name: jenkins
+          state: restarted
+          enabled: yes
+        changed_when: false
+
+      - pause:
+          minutes: 2
+
+      - name: install plugins
+        jenkins_plugin:
+          name: "{{ item }}"
+          state: present
+          timeout: 300
+          with_dependencies: yes
+        register: plugin_result
+        until: plugin_result is success
+        retries: 5
+        delay: 10
+        loop:
+            - antisamy-markup-formatter
+            - build-timeout
+            - cloudbees-folder
+            - credentials
+            - credentials-binding
+            - git
+            - github
+            - github-branch-source
+            - golang
+            - gradle
+            - ldap
+            - matrix-auth
+            - matrix-project
+            - nexus-artifact-uploader
+            - pam-auth
+            - pipeline-build-step
+            - pipeline-github-lib
+            - pipeline-stage-step
+            - pipeline-stage-view
+            - ssh
+            - ssh-credentials
+            - sshd
+            - timestamper
+            - workflow-aggregator
+            - workflow-job
+            - ws-cleanup
+
+      - copy:
+          src: /vagrant/files/
+          dest: /var/lib/jenkins/
+          owner: jenkins
+          group: jenkins
+          
+      - name: remove file 
+        file:
+          path: /var/lib/jenkins/identity.key.enc
+          state: absent
+      
+      - name: restart jenkins
+        service:
+          name: jenkins
+          state: restarted
+
+  - name: Setup Nexus
+    hosts: nexus
+    become: yes
+
+    pre_tasks:
+      - apt:
+          name: gpg
+          state: present
+      - apt_key:
+          url: https://adoptopenjdk.jfrog.io/adoptopenjdk/api/gpg/key/public
+      - apt_repository:
+          repo: deb https://adoptopenjdk.jfrog.io/adoptopenjdk/deb/ buster main
+          state: present
+          update_cache: true
+    vars:
+      java_packages:
+        - adoptopenjdk-8-hotspot-jre
+#      nexus_version: '3.31.1-01'
+      nexus_admin_password: "admin"
+      nexus_annonymous_access: yes
+      nexus_config_maven: false
+      nexus_config_raw: true
+      nexus_repos_raw_hosted:
+        - name: word-cloud-generator
+          version_policy: release
+          write_policy: allow
+      nexus_roles:
+        - id: upload
+          name: upload
+          description: all uploaders
+          privileges:
+            - nx-repository-view-raw-word-cloud-generator-*
+          roles: []
+        - id: download
+          name: download
+          description: all downloaders
+          privileges:
+            - nx-search-read
+            - all-repos-read
+          roles: []
+      nexus_local_users:
+        - username: uploader
+          state: present
+          first_name: uploader
+          last_name: loader
+          email: support@company.com
+          password: "uploader"
+          roles:
+            - upload
+        - username: downloader
+          state: present
+          first_name: downloader
+          last_name: loader
+          email: support@company.com
+          password: "downloader"
+          roles:
+            - download
+    roles:
+      - role: geerlingguy.java
+      - role: ansible-thoteam.nexus3-oss
+
+  - name: Config servers Staging & Production
+    hosts: servers
+    become: yes
+    vars:
+      my_password: vagrant
+    tasks:
+      - name: install essential packages
+        apt:
+          pkg:
+            - jq
+            - build-essential
+            - default-jre
+            - git
+            - mc
+          state: present
+          update_cache: true
+
+      - name: create directory /opt/wordcloud
+        file:
+          path: /opt/wordcloud
+          state: directory
+          mode: '0755'
+          owner: vagrant
+
+      - name: copy wordcloud.service
+        copy:
+          dest: /etc/systemd/system/wordcloud.service
+          src: /vagrant/wordcloud.service
+
+      - name: start and enable wordcloud.service
+        service:
+          name: wordcloud.service
+          state: started
+          enabled: yes
+    
+      - name: Change vagrant password
+        user:
+          name: vagrant
+          password: "{{ my_password | password_hash('sha512') }}"
+          shell: /bin/bash
+    
+      - name: Enable password authentificaton
+        replace:
+          path: /etc/ssh/sshd_config
+          regexp: '^PasswordAuthentication no$'
+          replace: 'PasswordAuthentication yes'
+        notify: restart sshd
+    
+    handlers:
+      - name: restart sshd
+        service:
+          name: sshd
+          state: restarted
