@@ -1,0 +1,7 @@
+pipeline {
+    agent none
+    options { skipDefaultCheckout() }
+    tools {
+        go 'Go'
+        git 'Default'
+    }
