@@ -1,0 +1,10 @@
+[Unit]
+Description=Word Cloud Generator
+
+[Service]
+WorkingDirectory=/opt/wordcloud
+ExecStart=/opt/wordcloud/word-cloud-generator
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

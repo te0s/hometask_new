@@ -28,6 +28,7 @@ Vagrant.configure("2") do |config|
   config.vm.provision :ansible_local do |ansible|
     ansible.playbook = "playbook.yaml"
     ansible.inventory_path = "inventory"
+    ansible.galaxy_command = "ansible-galaxy collection install -r%{role_file} --force"
     ansible.galaxy_role_file = "requirements.yaml"
   end
 end
