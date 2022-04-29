@@ -95,8 +95,7 @@
           update_cache: true
     vars:
       java_packages:
-        - adoptopenjdk-8-hotspot-jre
-#      nexus_version: '3.31.1-01'
+        - adoptopenjdk-8-hotspot-jre        
       nexus_admin_password: "admin"
       nexus_annonymous_access: yes
       nexus_config_maven: false
