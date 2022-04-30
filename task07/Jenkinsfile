@@ -20,7 +20,6 @@ pipeline {
                 sh '''export GOPATH=$WORKSPACE
                 export PATH="$PATH:$(go env GOPATH)/bin"
                 go get github.com/GeertJohan/go.rice/rice
-                go get github.com/te0s/word-cloud-generator/wordyapi
                 go get github.com/gorilla/mux
                 make lint
                 make test'''
@@ -34,7 +33,6 @@ pipeline {
                 go get github.com/tools/godep
                 go get github.com/smartystreets/goconvey
                 go get github.com/GeertJohan/go.rice/rice
-                go get github.com/te0s/word-cloud-generator/wordyapi
                 go get github.com/gorilla/mux
                 GOOS=linux GOARCH=amd64 go build -o ./artifacts/word-cloud-generator -v .
                 gzip -c ./artifacts/word-cloud-generator > ./artifacts/word-cloud-generator.gz
