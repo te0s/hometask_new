@@ -20,7 +20,7 @@ pipeline {
                 sh '''export GOPATH=$WORKSPACE
                 export PATH="$PATH:$(go env GOPATH)/bin"
                 go get github.com/GeertJohan/go.rice/rice
-                go get github.com/oshagova/word-cloud-generator/wordyapi
+                go get github.com/te0s/word-cloud-generator/wordyapi
                 go get github.com/gorilla/mux
                 make lint
                 make test'''
@@ -34,7 +34,7 @@ pipeline {
                 go get github.com/tools/godep
                 go get github.com/smartystreets/goconvey
                 go get github.com/GeertJohan/go.rice/rice
-                go get github.com/oshagova/word-cloud-generator/wordyapi
+                go get github.com/te0s/word-cloud-generator/wordyapi
                 go get github.com/gorilla/mux
                 GOOS=linux GOARCH=amd64 go build -o ./artifacts/word-cloud-generator -v .
                 gzip -c ./artifacts/word-cloud-generator > ./artifacts/word-cloud-generator.gz
@@ -49,4 +49,16 @@ pipeline {
                 nexusArtifactUploader artifacts: [[artifactId: 'word-cloud-generator', classifier: '', file: 'artifacts/word-cloud-generator', type: 'gz']], credentialsId: 'nexus-creds', groupId: 'web-app-pipeline', nexusUrl: '192.168.56.11:8081/', nexusVersion: 'nexus3', protocol: 'http', repository: 'word-cloud-generator', version: '1.$BUILD_NUMBER'
             }
         }
-		
+
+        stage('Install app on staging.vm') {
+            agent any
+            steps {   
+                sshPublisher(publishers: [sshPublisherDesc(configName: 'staging', transfers: [sshTransfer(cleanRemote: false, excludes: '', execCommand: '''sudo service wordcloud stop
+                curl -X GET -u admin:admin "http://192.168.56.11:8081/repository/word-cloud-generator/1/word-cloud-generator/1.$BUILD_NUMBER/word-cloud-generator-1.$BUILD_NUMBER.gz" -o /opt/wordcloud/word-cloud-generator.gz
+                gunzip /opt/wordcloud/word-cloud-generator.gz
+                chmod +x /opt/wordcloud/word-cloud-generator
+                sudo service wordcloud start
+                ''', execTimeout: 120000, flatten: false, makeEmptyDirs: false, noDefaultExcludes: false, patternSeparator: '[, ]+', remoteDirectory: '', remoteDirectorySDF: false, removePrefix: '', sourceFiles: '')], usePromotionTimestamp: false, useWorkspaceInPromotion: false, verbose: false)])    
+            }
+        }	
+
