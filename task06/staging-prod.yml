@@ -1,0 +1,33 @@
+---
+- name: install packages
+  apt:
+    name: curl
+    state: present
+    update_cache: true
+
+- name: create directory /opt/wordcloud
+  file:
+    path: /opt/wordcloud
+    state: directory
+    mode: '0755'
+    owner: vagrant
+
+- name: create service
+  copy:
+    dest: /etc/systemd/system/wordcloud.service
+    content: |
+      [Unit]
+      Description=Word Cloud Generator
+
+      [Service]
+      WorkingDirectory=/opt/wordcloud
+      ExecStart=/opt/wordcloud/word-cloud-generator
+
+      [Install]
+      WantedBy=multi-user.target
+
+- name: start and enable service
+  service:
+    name: wordcloud.service
+    state: started
+    enabled: yes

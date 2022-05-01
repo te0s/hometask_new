@@ -1,0 +1,32 @@
+---
+- name: Install plugins
+  jenkins_plugin:
+    name: "{{ item }}"
+    state: present
+    timeout: 300
+    with_dependencies: yes
+    url_username: "{{ jenkins_user }}"
+    url_password: "{{ jenkins_password }}"
+  register: plugin_results
+  until: plugin_results is success
+  retries: 5
+  delay: 10
+  loop:
+  - credentials-binding
+  - credentials
+  - plain-credentials
+  - git
+  - github
+  - github-branch-source
+  - golang
+  - pipeline
+  - ssh
+  - ssh-credentials
+  - sshd
+  - nexus-artifact-uploader
+  - timestamper  
+
+- name: restart jenkins
+  service:
+    name: jenkins
+    state: restarted

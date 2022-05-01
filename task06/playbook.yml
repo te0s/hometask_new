@@ -1,0 +1,24 @@
+---
+- name: Configure Jenkins
+  hosts: jenkins
+  become: yes
+  roles:
+  - jenkins
+
+
+- name: Configure Nexus
+  hosts: nexus
+  become: yes
+  vars_files:
+  - nexus_vars.yml
+
+  pre_tasks:
+  - include_tasks: nexus_pre_tasks.yml
+  roles:
+  - ansible-thoteam.nexus3-oss
+
+- name: Configure staging-production
+  hosts: staging, production
+  become: yes
+  tasks:
+  - include_tasks: staging-prod.yml

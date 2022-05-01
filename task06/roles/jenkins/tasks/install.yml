@@ -1,0 +1,65 @@
+---
+- name: Install key for repo
+  apt_key:
+    url: https://pkg.jenkins.io/debian/jenkins.io.key
+    state: present
+    
+- name: Add repo to repofile
+  apt_repository:
+    repo: deb https://pkg.jenkins.io/debian-stable binary/
+    state: present
+    update_cache: yes
+
+- name: Install packeges all other
+  apt:
+    pkg:
+    - git
+    - build-essential 
+    - default-jre
+    - mc
+    - python-pip
+    - jq
+    state: present
+    update_cache: yes
+
+- name: Install Payton
+  pip:
+    name:
+    - python-jenkins
+    - lxml
+
+- name: install jeninks
+  apt:
+    name: jenkins
+    state: present
+
+- name: Update Jenkins java opts
+  lineinfile:
+    dest: /lib/systemd/system/jenkins.service
+    regexp: '^Environment="JAVA_OPTS='
+    line: 'Environment="JAVA_OPTS=-Djava.awt.headless=true -Djenkins.install.runSetupWizard=false -Dhudson.security.csrf.GlobalCrumbIssuerConfiguration.DISABLE_CSRF_PROTECTION=true"'
+
+- name: Copy admin_user
+  copy:
+    src: users/
+    dest: /var/lib/jenkins/users
+    owner: jenkins
+    group: jenkins
+
+- name: Copy templates
+  template:
+    src: "{{ item }}"
+    dest: /var/lib/jenkins
+    owner: jenkins
+    group: jenkins
+  loop:
+  - 'config.xml'
+  - 'jenkins.model.JenkinsLocationConfiguration.xml'
+  - 'org.jenkinsci.plugins.golang.GolangBuildWrapper.xml'
+  - 'org.jvnet.hudson.plugins.SSHBuildWrapper.xml'
+
+- name: restart Jenkins
+  systemd:
+    name: jenkins
+    state: restarted
+    daemon_reload: yes
