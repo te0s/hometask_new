@@ -16,6 +16,22 @@ pipeline {
                 git 'https://github.com/Fenikks/word-cloud-generator.git'
             }
         }
+
+        stage('Make lint and make test') {
+            agent any
+            environment {
+                GOPATH = "${WORKSPACE}"
+                PATH = "$PATH:${WORKSPACE}/bin"
+            }
+            steps {   
+                sh script: """
+                sed -i 's/1.DEVELOPMENT/1.$BUILD_NUMBER/g' ./rice-box.go
+                make godep
+                make lint
+                make test
+            """
+            }
+        }        
         
         
         stage('Build job'){
