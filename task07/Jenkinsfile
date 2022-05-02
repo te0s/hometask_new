@@ -18,15 +18,13 @@ pipeline {
         }
 
         stage('Make lint and make test') {
-            agent any
             environment {
-                GOPATH = "${WORKSPACE}"
-                PATH = "$PATH:${WORKSPACE}/bin"
+                GOPATH=$WORKSPACE/go
+                PATH="$PATH:$(go env GOPATH)/bin"
             }
             steps {   
                 sh script: """
                 sed -i 's/1.DEVELOPMENT/1.$BUILD_NUMBER/g' ./rice-box.go
-                make godep
                 make lint
                 make test
             """
@@ -71,10 +69,9 @@ pipeline {
         }
 
         stage('Install app on staging.vm') {
-            agent any
             steps {   
                 sshPublisher(publishers: [sshPublisherDesc(configName: 'staging', transfers: [sshTransfer(cleanRemote: false, excludes: '', execCommand: '''sudo service wordcloud stop
-                curl -X GET -u admin:admin "http://192.168.33.80:8081/repository/word-cloud-generator/1/word-cloud-generator/1.$BUILD_NUMBER/word-cloud-generator-1.$BUILD_NUMBER.gz" -o /opt/wordcloud/word-cloud-generator.gz
+                curl -X GET -u admin:admin "http://192.168.33.90:8081/repository/word-cloud-generator/$git_branch/word-cloud-generator/1.$BUILD_NUMBER/word-cloud-generator-1.$BUILD_NUMBER.gz" -o /opt/wordcloud/word-cloud-generator.gz
                 gunzip /opt/wordcloud/word-cloud-generator.gz
                 chmod +x /opt/wordcloud/word-cloud-generator
                 sudo service wordcloud start
@@ -85,7 +82,6 @@ pipeline {
         stage('Parallel tests'){
             parallel{
                 stage('Tests #1'){
-                    agent any
                     steps{
                         sh '''res=`curl -s -H "Content-Type: application/json" -d \'{"text":"ths is a really really really important thing this is"}\' http://192.168.33.80:8888/version | jq \'. | length\'`
                         if [ "1" != "$res" ]; then
@@ -99,7 +95,7 @@ pipeline {
                 }
                 
                 stage('Tests #2'){
-                    agent any
+
                     steps{
                         sh '''res=`curl -s -H "Content-Type: application/json" -d \'{"text":"ths is a really really really important thing this is"}\' http://192.168.33.80:8888/version | jq \'. | length\'`
                         if [ "1" != "$res" ]; then
@@ -117,7 +113,7 @@ pipeline {
                 script {
                      def remote = [name: 'staging', host: '192.168.33.80', user: 'vagrant', password: 'vagrant', allowAnyHosts: true]
                      
-                     sshCommand remote: remote, command: "curl -X GET -u admin:admin \"http://192.168.33.85:8081/repository/word-cloud-generator/web-app-pipeline/word-cloud-generator/1.${env.BUILD_NUMBER}/word-cloud-generator-1.${env.BUILD_NUMBER}.gz\" -o /opt/wordcloud/word-cloud-generator.gz"
+                     sshCommand remote: remote, command: "curl -X GET -u admin:admin \"http://192.168.33.90:8081/repository/word-cloud-generator/$git_branch/word-cloud-generator/1.${env.BUILD_NUMBER}/word-cloud-generator-1.${env.BUILD_NUMBER}.gz\" -o /opt/wordcloud/word-cloud-generator.gz"
                      sshCommand remote: remote, command: "gunzip -f /opt/wordcloud/word-cloud-generator.gz"
                      sshCommand remote: remote, command: "chmod +x /opt/wordcloud/word-cloud-generator"
                      sshCommand remote: remote, command: "sudo service wordcloud start "
