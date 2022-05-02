@@ -44,9 +44,9 @@ pipeline {
                         file: 'artifacts/word-cloud-generator', 
                         type: 'gz']
                     ], 
-                    credentialsId: '$git_branch', 
+                    credentialsId: 'nexus-creds', 
                     groupId: 'pipeline_build', 
-                    nexusUrl: '192.168.56.11:8081/', 
+                    nexusUrl: '192.168.33.90:8081/', 
                     nexusVersion: 'nexus3', 
                     protocol: 'http', 
                     repository: 'word-cloud-generator', 
@@ -58,7 +58,7 @@ pipeline {
             agent any
             steps {   
                 sshPublisher(publishers: [sshPublisherDesc(configName: 'staging', transfers: [sshTransfer(cleanRemote: false, excludes: '', execCommand: '''sudo service wordcloud stop
-                curl -X GET -u admin:admin "http://192.168.56.11:8081/repository/word-cloud-generator/1/word-cloud-generator/1.$BUILD_NUMBER/word-cloud-generator-1.$BUILD_NUMBER.gz" -o /opt/wordcloud/word-cloud-generator.gz
+                curl -X GET -u admin:admin "http://192.168.33.80:8081/repository/word-cloud-generator/1/word-cloud-generator/1.$BUILD_NUMBER/word-cloud-generator-1.$BUILD_NUMBER.gz" -o /opt/wordcloud/word-cloud-generator.gz
                 gunzip /opt/wordcloud/word-cloud-generator.gz
                 chmod +x /opt/wordcloud/word-cloud-generator
                 sudo service wordcloud start
@@ -66,4 +66,47 @@ pipeline {
             }
         }	
 
-        stage
+        stage('Parallel tests'){
+            parallel{
+                stage('Tests #1'){
+                    agent any
+                    steps{
+                        sh '''res=`curl -s -H "Content-Type: application/json" -d \'{"text":"ths is a really really really important thing this is"}\' http://192.168.33.80:8888/version | jq \'. | length\'`
+                        if [ "1" != "$res" ]; then
+                          exit 99
+                        fi
+                        res=`curl -s -H "Content-Type: application/json" -d \'{"text":"ths is a really really really important thing this is"}\' http://192.168.33.80:8888/api | jq \'. | length\'`
+                        if [ "7" != "$res" ]; then
+                          exit 99
+                        fi'''
+                    }
+                }
+                
+                stage('Tests #2'){
+                    agent any
+                    steps{
+                        sh '''res=`curl -s -H "Content-Type: application/json" -d \'{"text":"ths is a really really really important thing this is"}\' http://192.168.33.80:8888/version | jq \'. | length\'`
+                        if [ "1" != "$res" ]; then
+                          exit 99
+                        fi
+                        res=`curl -s -H "Content-Type: application/json" -d \'{"text":"ths is a really really really important thing this is"}\' http://192.168.33.80:8888/api | jq \'. | length\'`
+                        if [ "7" != "$res" ]; then
+                          exit 99
+                        fi'''
+                    }
+                }
+            }
+        stage('Deploy production'){
+            steps{
+                script {
+                     def remote = [name: 'staging', host: '192.168.33.80', user: 'vagrant', password: 'vagrant', allowAnyHosts: true]
+                     
+                     sshCommand remote: remote, command: "curl -X GET -u admin:admin \"http://192.168.33.85:8081/repository/word-cloud-generator/web-app-pipeline/word-cloud-generator/1.${env.BUILD_NUMBER}/word-cloud-generator-1.${env.BUILD_NUMBER}.gz\" -o /opt/wordcloud/word-cloud-generator.gz"
+                     sshCommand remote: remote, command: "gunzip -f /opt/wordcloud/word-cloud-generator.gz"
+                     sshCommand remote: remote, command: "chmod +x /opt/wordcloud/word-cloud-generator"
+                     sshCommand remote: remote, command: "sudo service wordcloud start "
+                }     
+            }
+        }
+    }
+}
