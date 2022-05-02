@@ -1,0 +1,32 @@
+- name: Add credentials
+  command: |
+    curl -X POST "http://{{ jenkins_ip }}:8080/credentials/store/system/domain/_/createCredentials" \
+      --user "{{ jenkins_user }}":"{{ jenkins_password }}" --data-urlencode 'json={
+        "": "0", 
+        "credentials": { 
+        "scope": "GLOBAL", 
+        "id": "{{ item.id }}-creds", 
+        "username": "{{ item.user }}", 
+        "password": "{{ item.password }}", 
+        "description": "{{ item.id }}-creds", 
+        "stapler-class": "com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl" 
+      }
+    }'
+  register: creds_out
+  ignore_errors: yes
+  loop:
+  - {id: "vagrant", user: "vagrant", password: "vagrant"}
+  - {id: "nexus", user: "{{ nexus_user_uploader }}", password: "{{ nexus_user_uploader }}"}
+  - {id: "nexus-read", user: "{{ nexus_user_downloader }}", password: "{{ nexus_user_downloader }}"}
+
+ # uri:
+ #   url: "http://{{ jenkins_ip }}:8080/credentials/store/system/domain/_/createCredentials"
+ #   method: POST
+ #   force_basic_auth: yes
+ #   user: "{{ jenkins_user }}"
+ #   password: "{{ jenkins_password }}"
+ #   body_format: json
+ #   headers:
+ #     Accept: application/json
+ #     Content-Type: application/json
+ #   body:

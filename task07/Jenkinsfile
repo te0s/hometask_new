@@ -37,7 +37,20 @@ pipeline {
 		
         stage('Upload artifacts'){
             steps{
-                nexusArtifactUploader artifacts: [[artifactId: 'word-cloud-generator', classifier: '', file: 'artifacts/word-cloud-generator', type: 'gz']], credentialsId: 'nexus-creds', groupId: 'web-app-pipeline', nexusUrl: '192.168.56.11:8081/', nexusVersion: 'nexus3', protocol: 'http', repository: 'word-cloud-generator', version: '1.$BUILD_NUMBER'
+                nexusArtifactUploader (
+                    artifacts: [
+                        [artifactId: 'word-cloud-generator', 
+                        classifier: '', 
+                        file: 'artifacts/word-cloud-generator', 
+                        type: 'gz']
+                    ], 
+                    credentialsId: '$git_branch', 
+                    groupId: 'pipeline_build', 
+                    nexusUrl: '192.168.56.11:8081/', 
+                    nexusVersion: 'nexus3', 
+                    protocol: 'http', 
+                    repository: 'word-cloud-generator', 
+                    version: '1.$BUILD_NUMBER')
             }
         }
 

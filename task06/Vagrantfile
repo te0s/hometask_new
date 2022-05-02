@@ -1,33 +1,68 @@
-# -*- mode: ruby -*-
-# vi: set ft=ruby :
+JENKINS_IP  = "192.168.56.100"
+NEXUS_IP = "192.168.56.101"
+STAGING_IP = "192.168.56.102"
+PRODUCTION_IP = "192.168.56.103"
 
 Vagrant.configure("2") do |config|
+  config.vm.box = "generic/debian10"
 
-  config.vm.box = "debian/buster64"  
-  config.vm.box_check_update = false
-
-  hosts = [
-    { name: "production", forwarded_port: { guest: 8888, host: 8888 }, private_network: { ip: "192.168.56.13" }, memory: 1024, cpus: 1 },
-    { name: "staging", forwarded_port: { guest: 8888, host: 8889 }, private_network: { ip: "192.168.56.12" }, memory: 1024, cpus: 1 },
-    { name: "nexus", forwarded_port: { guest: 8081, host: 8081 }, private_network: { ip: "192.168.56.11" }, memory: 6144, cpus: 1 },
-    { name: "jenkins", forwarded_port: { guest: 8080, host: 8080 }, private_network: { ip: "192.168.56.15" }, memory: 1024, cpus: 2 },
-  ]
-
-  hosts.each do |host|
-    config.vm.define "#{host[:name]}.vm" do |hvm|
-      hvm.vm.network :forwarded_port, host[:forwarded_port] if host.key? :forwarded_port
-      hvm.vm.network :private_network, host[:private_network] if host.key? :private_network
-      hvm.vm.provider :virtualbox do |vb|
-        vb.memory = host[:memory]
-		vb.cpus = host[:cpus]
-		vb.name   = "#{host[:name]}.vm"
-      end
-    end
+  config.vm.provision "shell", inline: <<-SHELL
+    sed -i "s/^(.*)PasswordAuthentication no\$/PasswordAuthentication yes/g" /etc/ssh/sshd_config
+    service sshd restart
+    apt-get update
+    apt-get install -y sshpass
+    echo -e "vagrant\nvagrant" | passwd vagrant
+  SHELL
+ 
+  config.vm.define "staging" do |host|
+    host.vm.network "private_network", ip: STAGING_IP
+    host.vm.provider("virtualbox"){|vb| vb.memory = 256}
   end
-  
-  config.vm.provision :ansible_local do |ansible|
-    ansible.playbook = "playbook.yaml"
-    ansible.inventory_path = "inventory"
-    ansible.galaxy_role_file = "requirements.yaml"
+
+  config.vm.define "production" do |host|
+    host.vm.network "private_network", ip: PRODUCTION_IP
+    host.vm.provider("virtualbox"){|vb| vb.memory = 256}
+  end
+
+  config.vm.define "nexus" do |host|
+    host.vm.network "private_network", ip: NEXUS_IP
+    host.vm.provider("virtualbox"){|vb| vb.memory = 2048}
+  end
+
+  config.vm.define "jenkins" do |host|
+    host.vm.synced_folder ".", "/vagrant"
+    host.vm.network "private_network", ip: JENKINS_IP
+    host.vm.provider("virtualbox"){|vb| vb.memory = 1024}
+
+    host.vm.provision "ansible_local" do |ans|
+        ans.playbook = "playbook.yml"
+        ans.galaxy_role_file = "requirements.yml"
+        ans.galaxy_roles_path = '/etc/ansible/roles'
+        ans.galaxy_command =  'sudo ansible-galaxy install --role-file=%{role_file} --roles-path=%{roles_path} --force'
+        ans.limit = "all"
+        ans.groups = {
+            "all:vars" => {
+                "ansible_ssh_extra_args": "-o StrictHostKeyChecking=no",
+                "ansible_user": "vagrant",
+                "ansible_password": "vagrant",
+                "jenkins_ip": JENKINS_IP,
+                "nexus_ip": NEXUS_IP,
+                "staging_ip": STAGING_IP,
+                "production_ip": PRODUCTION_IP,
+                "nexus_repo": "word-cloud-build",
+                "nexus_user_uploader": "uploader",
+                "nexus_user_downloader": "downloader",
+                "jenkins_user": "admin",
+                "jenkins_password": "admin"
+
+            }
+        }
+        ans.host_vars = {
+            "jenkins" => {"ansible_host": JENKINS_IP},
+            "nexus" => {"ansible_host": NEXUS_IP},
+            "staging" => {"ansible_host": STAGING_IP},
+            "production" => {"ansible_host": PRODUCTION_IP}
+        }
+    end
   end
 end

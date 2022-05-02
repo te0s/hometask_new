@@ -1,24 +1,30 @@
 <?xml version='1.1' encoding='UTF-8'?>
 <project>
   <actions/>
-  <description>Web app by GO</description>
+  <description></description>
   <keepDependencies>false</keepDependencies>
   <properties>
-    <com.coravy.hudson.plugins.github.GithubProjectProperty plugin="github@1.33.1">
-      <projectUrl>https://github.com/oshagova/word-cloud-generator/</projectUrl>
-      <displayName></displayName>
-    </com.coravy.hudson.plugins.github.GithubProjectProperty>
+    <hudson.model.ParametersDefinitionProperty>
+      <parameterDefinitions>
+        <hudson.model.StringParameterDefinition>
+          <name>GIT_BRANCH_NAME</name>
+          <description>Git branch we want to build</description>
+          <defaultValue>master</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+      </parameterDefinitions>
+    </hudson.model.ParametersDefinitionProperty>
   </properties>
-  <scm class="hudson.plugins.git.GitSCM" plugin="git@4.7.2">
+  <scm class="hudson.plugins.git.GitSCM" plugin="git@4.11.0">
     <configVersion>2</configVersion>
     <userRemoteConfigs>
       <hudson.plugins.git.UserRemoteConfig>
-        <url>https://github.com/oshagova/word-cloud-generator.git</url>
+        <url>https://github.com/Fenikks/word-cloud-generator.git</url>
       </hudson.plugins.git.UserRemoteConfig>
     </userRemoteConfigs>
     <branches>
       <hudson.plugins.git.BranchSpec>
-        <name>*/master</name>
+        <name>*/$GIT_BRANCH_NAME</name>
       </hudson.plugins.git.BranchSpec>
     </branches>
     <doGenerateSubmoduleConfigurations>false</doGenerateSubmoduleConfigurations>
@@ -33,30 +39,33 @@
   <concurrentBuild>false</concurrentBuild>
   <builders>
     <hudson.tasks.Shell>
-      <command>export GOPATH=$WORKSPACE
+      <command>export GOPATH=$WORKSPACE/go
 export PATH=&quot;$PATH:$(go env GOPATH)/bin&quot;
 
 go get github.com/tools/godep
 go get github.com/smartystreets/goconvey
 go get github.com/GeertJohan/go.rice/rice
-go get github.com/oshagova/word-cloud-generator/wordyapi
+go get github.com/wickett/word-cloud-generator/wordyapi
 go get github.com/gorilla/mux
 
+sed -i &quot;s/1.DEVELOPMENT/1.$BUILD_NUMBER/g&quot; static/version
+
 GOOS=linux GOARCH=amd64 go build -o ./artifacts/word-cloud-generator -v .
-gzip -c ./artifacts/word-cloud-generator &gt; ./artifacts/word-cloud-generator.gz
-rm ./artifacts/word-cloud-generator
-mv ./artifacts/word-cloud-generator.gz ./artifacts/word-cloud-generator
-ls -l artifacts
+
+gzip artifacts/word-cloud-generator
+mv artifacts/word-cloud-generator.gz artifacts/word-cloud-generator
+
+ls -l artifacts/
 </command>
       <configuredLocalRules/>
     </hudson.tasks.Shell>
     <sp.sd.nexusartifactuploader.NexusArtifactUploader plugin="nexus-artifact-uploader@2.13">
       <nexusVersion>nexus3</nexusVersion>
       <protocol>http</protocol>
-      <nexusUrl>192.168.33.11:8081/</nexusUrl>
-      <groupId>new-web-app</groupId>
+      <nexusUrl>{{ nexus_ip }}:8081</nexusUrl>
+      <groupId>$GIT_BRANCH_NAME</groupId>
       <version>1.$BUILD_NUMBER</version>
-      <repository>word-cloud-generator</repository>
+      <repository>{{ nexus_repo }}</repository>
       <artifacts>
         <sp.sd.nexusartifactuploader.Artifact>
           <artifactId>word-cloud-generator</artifactId>
@@ -68,10 +77,11 @@ ls -l artifacts
       <credentialsId>nexus-creds</credentialsId>
     </sp.sd.nexusartifactuploader.NexusArtifactUploader>
     <org.jvnet.hudson.plugins.SSHBuilder plugin="ssh@2.6.1">
-      <siteName>vagrant@192.168.33.12:22</siteName>
+      <siteName>vagrant@{{ staging_ip }}:22</siteName>
       <command>sudo service wordcloud stop
 
-curl -X GET -u admin:admin &quot;http://192.168.33.11:8081/repository/word-cloud-generator/new-web-app/word-cloud-generator/1.$BUILD_NUMBER/word-cloud-generator-1.$BUILD_NUMBER.gz&quot; -o /opt/wordcloud/word-cloud-generator.gz
+curl -X GET -u $nexus_user:$nexus_password http://{{ nexus_ip }}:8081/repository/word-cloud-build/$GIT_BRANCH_NAME/word-cloud-generator/1.$BUILD_NUMBER/word-cloud-generator-1.$BUILD_NUMBER.gz -o /opt/wordcloud/word-cloud-generator.gz
+ls -l /opt/wordcloud
 gunzip -f /opt/wordcloud/word-cloud-generator.gz
 chmod +x /opt/wordcloud/word-cloud-generator
 
@@ -80,22 +90,23 @@ sudo service wordcloud start</command>
       <hideCommand>false</hideCommand>
     </org.jvnet.hudson.plugins.SSHBuilder>
     <hudson.tasks.Shell>
-      <command>res=`curl -s -H &quot;Content-Type: application/json&quot; -d &apos;{&quot;text&quot;:&quot;ths is a really really really important thing this is&quot;}&apos; http://192.168.33.12:8888/version | jq &apos;. | length&apos;`
+      <command>res=`curl -s -H &quot;Content-Type: application/json&quot; -d &apos;{&quot;text&quot;:&quot;ths is a really really really important thing this is&quot;}&apos; http://{{ staging_ip }}:8888/version | jq &apos;. | length&apos;`
 if [ &quot;1&quot; != &quot;$res&quot; ]; then
   exit 99
 fi
 
-res=`curl -s -H &quot;Content-Type: application/json&quot; -d &apos;{&quot;text&quot;:&quot;ths is a really really really important thing this is&quot;}&apos; http://192.168.33.12:8888/api | jq &apos;. | length&apos;`
+res=`curl -s -H &quot;Content-Type: application/json&quot; -d &apos;{&quot;text&quot;:&quot;ths is a really really really important thing this is&quot;}&apos; http://{{ staging_ip }}:8888/api | jq &apos;. | length&apos;`
 if [ &quot;7&quot; != &quot;$res&quot; ]; then
   exit 99
 fi</command>
       <configuredLocalRules/>
     </hudson.tasks.Shell>
     <org.jvnet.hudson.plugins.SSHBuilder plugin="ssh@2.6.1">
-      <siteName>vagrant@192.168.33.13:22</siteName>
+      <siteName>vagrant@{{ production_ip }}:22</siteName>
       <command>sudo service wordcloud stop
 
-curl -X GET -u admin:admin &quot;http://192.168.33.11:8081/repository/word-cloud-generator/new-web-app/word-cloud-generator/1.$BUILD_NUMBER/word-cloud-generator-1.$BUILD_NUMBER.gz&quot; -o /opt/wordcloud/word-cloud-generator.gz
+curl -X GET -u $nexus_user:$nexus_password http://{{ nexus_ip }}:8081/repository/word-cloud-build/$GIT_BRANCH_NAME/word-cloud-generator/1.$BUILD_NUMBER/word-cloud-generator-1.$BUILD_NUMBER.gz -o /opt/wordcloud/word-cloud-generator.gz
+ls -l /opt/wordcloud
 gunzip -f /opt/wordcloud/word-cloud-generator.gz
 chmod +x /opt/wordcloud/word-cloud-generator
 
@@ -116,9 +127,18 @@ sudo service wordcloud start</command>
     </hudson.tasks.ArtifactArchiver>
   </publishers>
   <buildWrappers>
-    <hudson.plugins.timestamper.TimestamperBuildWrapper plugin="timestamper@1.13"/>
+    <org.jenkinsci.plugins.credentialsbinding.impl.SecretBuildWrapper plugin="credentials-binding@523.vd859a_4b_122e6">
+      <bindings>
+        <org.jenkinsci.plugins.credentialsbinding.impl.UsernamePasswordMultiBinding>
+          <credentialsId>nexus-read-creds</credentialsId>
+          <usernameVariable>nexus_user</usernameVariable>
+          <passwordVariable>nexus_password</passwordVariable>
+        </org.jenkinsci.plugins.credentialsbinding.impl.UsernamePasswordMultiBinding>
+      </bindings>
+    </org.jenkinsci.plugins.credentialsbinding.impl.SecretBuildWrapper>
+    <hudson.plugins.timestamper.TimestamperBuildWrapper plugin="timestamper@1.17"/>
     <org.jenkinsci.plugins.golang.GolangBuildWrapper plugin="golang@1.4">
-      <goVersion>Go 1.13.15</goVersion>
+      <goVersion>Go 1.16</goVersion>
     </org.jenkinsci.plugins.golang.GolangBuildWrapper>
   </buildWrappers>
 </project>

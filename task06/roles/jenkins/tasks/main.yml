@@ -1,0 +1,5 @@
+---
+- include_tasks: install.yml
+- include_tasks: plugins.yml
+- include_tasks: jobs.yml
+- include_tasks: creds.yml

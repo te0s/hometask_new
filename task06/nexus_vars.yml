@@ -1,0 +1,39 @@
+nexus_version: ''
+nexus_admin_password: admin
+nexus_config_maven: false
+nexus_delete_default_repos: true
+nexus_config_raw: true
+nexus_repos_raw_hosted:
+- name: "{{ nexus_repo }}"
+  version_policy: release
+  write_policy: allow
+nexus_roles:
+- id: nx-{{ nexus_user_uploader }}
+  name: nx-{{ nexus_user_uploader }}
+  description: uploader
+  privileges:
+  - nx-repository-view-raw-{{ nexus_repo }}-*
+  roles: []
+- id: nx-{{ nexus_user_downloader }}
+  name: nx-{{ nexus_user_downloader }}
+  description: downloader
+  privileges:
+  - nx-repository-view-raw-{{ nexus_repo }}-read
+  roles: []
+nexus_local_users:
+- username: "{{ nexus_user_uploader }}"
+  state: present
+  first_name: "{{ nexus_user_uploader }}"
+  last_name: loader
+  email: support@company.com
+  password: "{{ nexus_user_uploader }}"
+  roles:
+  - nx-{{ nexus_user_uploader }}
+- username: "{{ nexus_user_downloader }}"
+  state: present
+  first_name: "{{ nexus_user_downloader }}"
+  last_name: downloader
+  email: support@company.com
+  password: "{{ nexus_user_downloader }}"
+  roles:
+  - nx-{{ nexus_user_downloader }}

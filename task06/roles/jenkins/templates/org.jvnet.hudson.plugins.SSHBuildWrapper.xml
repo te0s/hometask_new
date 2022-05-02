@@ -2,19 +2,19 @@
 <org.jvnet.hudson.plugins.SSHBuildWrapper_-DescriptorImpl plugin="ssh@2.6.1">
   <sites>
     <org.jvnet.hudson.plugins.CredentialsSSHSite>
-      <hostname>192.168.33.12</hostname>
+      <hostname>{{ staging_ip }}</hostname>
       <username>vagrant</username>
       <port>22</port>
-      <credentialId>servers</credentialId>
+      <credentialId>vagrant-creds</credentialId>
       <serverAliveInterval>0</serverAliveInterval>
       <timeout>0</timeout>
       <pty>false</pty>
     </org.jvnet.hudson.plugins.CredentialsSSHSite>
     <org.jvnet.hudson.plugins.CredentialsSSHSite>
-      <hostname>192.168.33.13</hostname>
+      <hostname>{{ production_ip }}</hostname>
       <username>vagrant</username>
       <port>22</port>
-      <credentialId>servers</credentialId>
+      <credentialId>vagrant-creds</credentialId>
       <serverAliveInterval>0</serverAliveInterval>
       <timeout>0</timeout>
       <pty>false</pty>
