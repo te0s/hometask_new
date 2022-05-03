@@ -109,6 +109,8 @@ pipeline {
                     }
                 }
             }
+        }    
+        
         stage('Deploy production'){
             steps{
                 script {
