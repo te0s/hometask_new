@@ -1,7 +1,7 @@
-JENKINS_IP  = "192.168.56.100"
-NEXUS_IP = "192.168.56.101"
-STAGING_IP = "192.168.56.102"
-PRODUCTION_IP = "192.168.56.103"
+JENKINS_IP  = "192.168.33.100"
+NEXUS_IP = "192.168.33.90"
+STAGING_IP = "192.168.33.80"
+PRODUCTION_IP = "192.168.33.85"
 
 Vagrant.configure("2") do |config|
   config.vm.box = "generic/debian10"
