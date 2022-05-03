@@ -34,18 +34,19 @@ pipeline {
         
         stage('Build job'){
             steps{
-                sh '''export GOPATH=$WORKSPACE
-                export PATH="$PATH:$(go env GOPATH)/bin"
-                go get github.com/tools/godep
-                go get github.com/smartystreets/goconvey
-                go get github.com/GeertJohan/go.rice/rice
-                go get github.com/wickett/word-cloud-generator/wordyapi                
-                go get github.com/gorilla/mux
-                GOOS=linux GOARCH=amd64 go build -o ./artifacts/word-cloud-generator -v .
-                gzip -c ./artifacts/word-cloud-generator > ./artifacts/word-cloud-generator.gz
-                rm ./artifacts/word-cloud-generator
-                mv ./artifacts/word-cloud-generator.gz ./artifacts/word-cloud-generator
-                ls -l artifacts'''
+                sh '''
+                      export GOPATH=$WORKSPACE/go
+                      export PATH="$PATH:$(go env GOPATH)/bin"
+                      go get github.com/tools/godep
+                      go get github.com/smartystreets/goconvey
+                      go get github.com/GeertJohan/go.rice/rice
+                      go get github.com/wickett/word-cloud-generator/wordyapi                
+                      go get github.com/gorilla/mux
+                      GOOS=linux GOARCH=amd64 go build -o ./artifacts/word-cloud-generator -v .
+                      gzip -c ./artifacts/word-cloud-generator > ./artifacts/word-cloud-generator.gz
+                      rm ./artifacts/word-cloud-generator
+                      mv ./artifacts/word-cloud-generator.gz ./artifacts/word-cloud-generator
+                      ls -l artifacts'''
             }
         }
 		
