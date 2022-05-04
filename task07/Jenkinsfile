@@ -103,7 +103,6 @@ pipeline {
                           exit 99
                         fi'''
                     }
-                }
             }
         }    
         

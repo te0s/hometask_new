@@ -1,0 +1,14 @@
+FROM golang:1.16 as golang
+
+RUN mkdir /wcg: \
+    cd /wcg; \
+    git clone https://github.com/Fenikks/world-cloud-generetor.git .; \
+    make
+
+CMD /wcg/artifacts/linux/world-cloud-generetor
+
+FROM alpine:latest
+
+COPY --from=golang /wcg/artifacts/linux/word-cloud-generator .
+
+CMD /word-cloud-generator
