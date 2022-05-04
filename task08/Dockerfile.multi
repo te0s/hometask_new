@@ -9,6 +9,7 @@ CMD /wcg/artifacts/linux/world-cloud-generetor
 
 FROM alpine:latest
 
+RUN apk add gcompat
 COPY --from=golang /wcg/artifacts/linux/word-cloud-generator .
 
 CMD /word-cloud-generator
