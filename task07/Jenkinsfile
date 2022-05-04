@@ -18,10 +18,6 @@ pipeline {
         }
 
         stage('Make lint and make test') {
-            environment {
-                GOPATH=$WORKSPACE/go
-                PATH="$PATH:$(go env GOPATH)/bin"
-            }
             steps {   
                 sh script: """
                 sed -i 's/1.DEVELOPMENT/1.$BUILD_NUMBER/g' ./rice-box.go
@@ -69,7 +65,7 @@ pipeline {
             }
         }
 
-        stage('Install app on staging.vm') {
+        stage('Install on staging') {
             steps {   
                 sshPublisher(publishers: [sshPublisherDesc(configName: 'staging', transfers: [sshTransfer(cleanRemote: false, excludes: '', execCommand: '''sudo service wordcloud stop
                 curl -X GET -u admin:admin "http://192.168.33.90:8081/repository/word-cloud-generator/$git_branch/word-cloud-generator/1.$BUILD_NUMBER/word-cloud-generator-1.$BUILD_NUMBER.gz" -o /opt/wordcloud/word-cloud-generator.gz
