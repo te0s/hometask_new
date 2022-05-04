@@ -6,6 +6,7 @@ RUN mkdir /wcg: \
     make
 
 CMD /wcg/artifacts/linux/world-cloud-generetor
+#я знаю что она лишняя, но мне нравится)
 
 FROM alpine:latest
 
