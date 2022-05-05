@@ -5,8 +5,6 @@ RUN mkdir /wcg: \
     git clone https://github.com/Fenikks/world-cloud-generetor.git .; \
     make
 
-CMD /wcg/artifacts/linux/world-cloud-generetor
-#я знаю что она лишняя, но мне нравится)
 
 FROM alpine:latest
 
