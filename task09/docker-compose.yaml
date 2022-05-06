@@ -31,3 +31,6 @@ services:
             - docker-certs:/certs/client
             - docker-data:/var/lib/docker
                 
+volumes:
+   jenkins-data:
+   docker-certs:
