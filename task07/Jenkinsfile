@@ -20,7 +20,6 @@ pipeline {
         stage('Make lint and make test') {
             steps {   
                 sh script: """
-                sed -i 's/1.DEVELOPMENT/1.$BUILD_NUMBER/g' ./rice-box.go
                 make lint
                 make test
             """
