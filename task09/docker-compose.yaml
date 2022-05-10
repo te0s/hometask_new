@@ -1,37 +1,29 @@
 version: "3.7"
 
 services:
-    
-    jenkins:
-        image: jenkinsci/blueocean
-        ports:
-            - "8000:8080"
-        build:
-            context: ./docker/common/jenkins
 
-        environment:
-            DOCKER_HOST: tcp://docker:2376
-            DOCKER_CERT_PATH: /certs/client
-            DOCKER_TLS_FERIFY: 1
+  nexus:
+    build: nexus/
+    stdin_open: true
+    networks:
+      app_net:
+        ipv4_address: 192.168.33.90
+    ports:
+      - 81:8081
 
-        volumes:
-            - jenkins-data:/var/jenkins_home
-            - docker-certs:/certs/client:ro
+  jenkins:
+    build: jenkins/
+    stdin_open: true
+    networks:
+      app_net:
+        ipv4_address: 192.168.33.100
+    ports:
+      - 80:8080
 
-        depends_on:
-            - docker
-
-    docker:
-        image: docker:dind
-        privileged: true
-        environment:
-            DOCKER_TLS_CERTDIR: /certs 
-        volumes:
-            - jenkins-data:/var/jenkins-home
-            - docker-certs:/certs
-            - docker-data:/var/lib/docker
-                
-volumes:
-   jenkins-data:
-   docker-certs:
-   docker-data:
+networks:
+  app_net:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 192.168.33.0/24

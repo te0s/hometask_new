@@ -25,5 +25,6 @@ Vagrant.configure("2") do |config|
       usermod -aG docker vagrant
       sed -i "s/^#force_color_prompt=yes\$/force_color_prompt=yes/g" /home/vagrant/.bashrc
       sed -i "s/^#alias ll='ls -l'\$/alias ll='ls -la'/g" /home/vagrant/.bashrc
+      sudo apt install docker-compose -y
     SHELL
   end
