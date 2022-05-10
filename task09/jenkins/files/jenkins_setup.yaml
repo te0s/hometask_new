@@ -1,6 +1,6 @@
 ---
 - name: Configure Jenkins
-  hosts: jenkins
+  hosts: localhost
   become: yes
   roles:
   - jenkins
