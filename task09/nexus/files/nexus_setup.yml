@@ -1,0 +1,11 @@
+---
+- name: Configure Nexus
+  hosts: localhost
+  become: yes
+  vars_files:
+  - nexus_vars.yml
+
+  pre_tasks:
+  - include_tasks: nexus_pre_tasks.yml
+  roles:
+  - ansible-thoteam.nexus3-oss
