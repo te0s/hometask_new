@@ -6,7 +6,7 @@ RUN apt-get clean && apt-get update \
 ADD files /tmp/files
 
 RUN ansible-galaxy install ansible-thoteam.nexus3-oss \
-&& ansible-playbook /tmp/files/nexus.yaml
+&& ansible-playbook /tmp/files/nexus_setup.yml
 
 EXPOSE 81
 
