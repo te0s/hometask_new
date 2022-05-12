@@ -48,6 +48,8 @@
   with_items: 
     - { path: "/etc/default/jenkins", exp: '^JAVA_ARGS="-Djava.awt.headless=true"', n_ln: 'JAVA_ARGS="-Djava.awt.headless=true -Djenkins.install.runSetupWizard=false -Dhudson.security.csrf.DefaultCrumbIssuer.EXCLUDE_SESSION_ID=true"' }
 
+- name: Ensure Jenkins is started and runs on startup
+  service: name=jenkins state=started enabled=yes
 
 - name: Copy admin_user
   copy:
@@ -68,8 +70,7 @@
   - 'org.jenkinsci.plugins.golang.GolangBuildWrapper.xml'
   - 'org.jvnet.hudson.plugins.SSHBuildWrapper.xml'
 
-- name: Ensure Jenkins is started and runs on startup
-  service: name=jenkins state=started enabled=yes
+
 
 - name: Sleep for 180 seconds and continue with play
   wait_for:
