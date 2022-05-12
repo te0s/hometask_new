@@ -71,8 +71,4 @@
   - 'org.jenkinsci.plugins.golang.GolangBuildWrapper.xml'
   - 'org.jvnet.hudson.plugins.SSHBuildWrapper.xml'
 
-- name: restart Jenkins
-  systemd:
-    name: jenkins
-    state: restarted
-    daemon_reload: yes
+- service: name=jenkins state=started enabled=yes
