@@ -32,24 +32,12 @@
   apt:
     name: jenkins
     state: present
-#
-#- name: Update Jenkins java opts
-#  lineinfile:
-#    dest: /lib/systemd/system/jenkins.service
-#    regexp: '^Environment="JAVA_OPTS='
-#    line: 'Environment="JAVA_OPTS=-Djava.awt.headless=true -Djenkins.install.runSetupWizard=false -Dhudson.security.csrf.GlobalCrumbIssuerConfiguration.DISABLE_CSRF_PROTECTION=true"'
-#
-- name: Disable start wizard 
-  lineinfile: 
-     path: "{{ item.path }}" 
-     state: present 
-     regexp: "{{ item.exp }}" 
-     line: "{{ item.n_ln }}" 
-  with_items: 
-    - { path: "/etc/default/jenkins", exp: '^JAVA_ARGS="-Djava.awt.headless=true"', n_ln: 'JAVA_ARGS="-Djava.awt.headless=true -Djenkins.install.runSetupWizard=false -Dhudson.security.csrf.DefaultCrumbIssuer.EXCLUDE_SESSION_ID=true"' }
 
-- name: Ensure Jenkins is started and runs on startup
-  service: name=jenkins state=started enabled=yes
+- name: Update Jenkins java opts
+  lineinfile:
+    dest: /lib/systemd/system/jenkins.service
+    regexp: '^Environment="JAVA_OPTS='
+    line: 'Environment="JAVA_OPTS=-Djava.awt.headless=true -Djenkins.install.runSetupWizard=false -Dhudson.security.csrf.GlobalCrumbIssuerConfiguration.DISABLE_CSRF_PROTECTION=true"'
 
 - name: Copy admin_user
   copy:
@@ -70,9 +58,8 @@
   - 'org.jenkinsci.plugins.golang.GolangBuildWrapper.xml'
   - 'org.jvnet.hudson.plugins.SSHBuildWrapper.xml'
 
-
-
-- name: Sleep for 180 seconds and continue with play
-  wait_for:
-    timeout: 180
-  delegate_to: localhost
+- name: restart Jenkins
+  systemd:
+    name: jenkins
+    state: restarted
+    daemon_reload: yes
