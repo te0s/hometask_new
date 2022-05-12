@@ -1,4 +1,12 @@
 ---
+- name: Install packeges all other
+  apt:
+    pkg:
+    - gpg
+    - gnupg
+    state: present
+    update_cache: yes
+
 - name: Install key for repo
   apt_key:
     url: https://pkg.jenkins.io/debian/jenkins.io.key
@@ -14,11 +22,15 @@
   apt:
     pkg:
     - git
+    - gpg
+    - gnupg
     - build-essential 
     - default-jre
     - mc
     - python-pip
     - jq
+    - python3-pip
+
     state: present
     update_cache: yes
 
