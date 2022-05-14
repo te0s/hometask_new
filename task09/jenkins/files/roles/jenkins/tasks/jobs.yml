@@ -15,7 +15,7 @@
     group: jenkins
     force: yes
   with_items:
-      - { src: "/tmp/jobs/GoBuild/config.xml", dst: "/var/lib/jenkins/jobs/GoBuild/" }
+      - { src: "/tmp/files/jobs/GoBuild/config.xml", dst: "/var/lib/jenkins/jobs/GoBuild/" }
 
 
 
