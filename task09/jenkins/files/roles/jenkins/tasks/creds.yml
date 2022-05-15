@@ -1,6 +1,6 @@
 - name: Add credentials
   command: |
-    curl -X POST "http://{{ jenkins_ip }}:8080/credentials/store/system/domain/_/createCredentials" \
+    curl -X POST "http://localhost:8080/credentials/store/system/domain/_/createCredentials" \
       --user "{{ jenkins_user }}":"{{ jenkins_password }}" --data-urlencode 'json={
         "": "0", 
         "credentials": { 
