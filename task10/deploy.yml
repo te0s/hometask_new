@@ -8,7 +8,7 @@ spec:
       app: static-site
   replicas: 3 # запускает 3 пода, созданных по шаблону
   template:
-    metadata:
+    metadata:   # данные, позволяющие идентифицировать объект
       labels:
         app: static-site
     spec:    # требуемое состояние обьекта 
