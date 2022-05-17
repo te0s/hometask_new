@@ -11,7 +11,7 @@ spec:
     metadata:
       labels:
         app: static-site
-    spec:
+    spec:    # требуемое состояние обьекта 
       containers:
       - name: static-site
         image: te0s/staticdeploy:latest
