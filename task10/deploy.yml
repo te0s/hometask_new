@@ -1,4 +1,4 @@
-apiVersion: apps/v1
+apiVersion: apps/v1 # до версии 1.9.0 нужно использовать apps/v1beta2
 kind: Deployment
 metadata:
   name: static-deployment
@@ -6,7 +6,7 @@ spec:
   selector:
     matchLabels:
       app: static-site
-  replicas: 3
+  replicas: 3 # запускает 3 пода, созданных по шаблону
   template:
     metadata:
       labels:
