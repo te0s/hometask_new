@@ -1,0 +1,144 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<project>
+  <actions/>
+  <description></description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <hudson.model.ParametersDefinitionProperty>
+      <parameterDefinitions>
+        <hudson.model.StringParameterDefinition>
+          <name>GIT_BRANCH_NAME</name>
+          <description>Git branch we want to build</description>
+          <defaultValue>master</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+      </parameterDefinitions>
+    </hudson.model.ParametersDefinitionProperty>
+  </properties>
+  <scm class="hudson.plugins.git.GitSCM" plugin="git@4.11.0">
+    <configVersion>2</configVersion>
+    <userRemoteConfigs>
+      <hudson.plugins.git.UserRemoteConfig>
+        <url>https://github.com/Fenikks/word-cloud-generator.git</url>
+      </hudson.plugins.git.UserRemoteConfig>
+    </userRemoteConfigs>
+    <branches>
+      <hudson.plugins.git.BranchSpec>
+        <name>*/$GIT_BRANCH_NAME</name>
+      </hudson.plugins.git.BranchSpec>
+    </branches>
+    <doGenerateSubmoduleConfigurations>false</doGenerateSubmoduleConfigurations>
+    <submoduleCfg class="empty-list"/>
+    <extensions/>
+  </scm>
+  <canRoam>true</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <triggers/>
+  <concurrentBuild>false</concurrentBuild>
+  <builders>
+    <hudson.tasks.Shell>
+      <command>export GOPATH=$WORKSPACE/go
+export PATH=&quot;$PATH:$(go env GOPATH)/bin&quot;
+
+go get github.com/tools/godep
+go get github.com/smartystreets/goconvey
+go get github.com/GeertJohan/go.rice/rice
+go get github.com/wickett/word-cloud-generator/wordyapi
+go get github.com/gorilla/mux
+
+sed -i &quot;s/1.DEVELOPMENT/1.$BUILD_NUMBER/g&quot; static/version
+
+GOOS=linux GOARCH=amd64 go build -o ./artifacts/word-cloud-generator -v .
+
+gzip artifacts/word-cloud-generator
+mv artifacts/word-cloud-generator.gz artifacts/word-cloud-generator
+
+ls -l artifacts/
+</command>
+      <configuredLocalRules/>
+    </hudson.tasks.Shell>
+    <sp.sd.nexusartifactuploader.NexusArtifactUploader plugin="nexus-artifact-uploader@2.13">
+      <nexusVersion>nexus3</nexusVersion>
+      <protocol>http</protocol>
+      <nexusUrl>{{ nexus_ip }}:8081</nexusUrl>
+      <groupId>$GIT_BRANCH_NAME</groupId>
+      <version>1.$BUILD_NUMBER</version>
+      <repository>{{ nexus_repo }}</repository>
+      <artifacts>
+        <sp.sd.nexusartifactuploader.Artifact>
+          <artifactId>word-cloud-generator</artifactId>
+          <type>gz</type>
+          <classifier></classifier>
+          <file>artifacts/word-cloud-generator</file>
+        </sp.sd.nexusartifactuploader.Artifact>
+      </artifacts>
+      <credentialsId>nexus-creds</credentialsId>
+    </sp.sd.nexusartifactuploader.NexusArtifactUploader>
+    <org.jvnet.hudson.plugins.SSHBuilder plugin="ssh@2.6.1">
+      <siteName>vagrant@{{ staging_ip }}:22</siteName>
+      <command>sudo service wordcloud stop
+
+curl -X GET -u $nexus_user:$nexus_password http://{{ nexus_ip }}:8081/repository/word-cloud-build/$GIT_BRANCH_NAME/word-cloud-generator/1.$BUILD_NUMBER/word-cloud-generator-1.$BUILD_NUMBER.gz -o /opt/wordcloud/word-cloud-generator.gz
+ls -l /opt/wordcloud
+gunzip -f /opt/wordcloud/word-cloud-generator.gz
+chmod +x /opt/wordcloud/word-cloud-generator
+
+sudo service wordcloud start</command>
+      <execEachLine>false</execEachLine>
+      <hideCommand>false</hideCommand>
+    </org.jvnet.hudson.plugins.SSHBuilder>
+    <hudson.tasks.Shell>
+      <command>res=`curl -s -H &quot;Content-Type: application/json&quot; -d &apos;{&quot;text&quot;:&quot;ths is a really really really important thing this is&quot;}&apos; http://{{ staging_ip }}:8888/version | jq &apos;. | length&apos;`
+if [ &quot;1&quot; != &quot;$res&quot; ]; then
+  exit 99
+fi
+
+res=`curl -s -H &quot;Content-Type: application/json&quot; -d &apos;{&quot;text&quot;:&quot;ths is a really really really important thing this is&quot;}&apos; http://{{ staging_ip }}:8888/api | jq &apos;. | length&apos;`
+if [ &quot;7&quot; != &quot;$res&quot; ]; then
+  exit 99
+fi</command>
+      <configuredLocalRules/>
+    </hudson.tasks.Shell>
+    <org.jvnet.hudson.plugins.SSHBuilder plugin="ssh@2.6.1">
+      <siteName>vagrant@{{ production_ip }}:22</siteName>
+      <command>sudo service wordcloud stop
+
+curl -X GET -u $nexus_user:$nexus_password http://{{ nexus_ip }}:8081/repository/word-cloud-build/$GIT_BRANCH_NAME/word-cloud-generator/1.$BUILD_NUMBER/word-cloud-generator-1.$BUILD_NUMBER.gz -o /opt/wordcloud/word-cloud-generator.gz
+ls -l /opt/wordcloud
+gunzip -f /opt/wordcloud/word-cloud-generator.gz
+chmod +x /opt/wordcloud/word-cloud-generator
+
+sudo service wordcloud start</command>
+      <execEachLine>false</execEachLine>
+      <hideCommand>false</hideCommand>
+    </org.jvnet.hudson.plugins.SSHBuilder>
+  </builders>
+  <publishers>
+    <hudson.tasks.ArtifactArchiver>
+      <artifacts>artifacts/*</artifacts>
+      <allowEmptyArchive>false</allowEmptyArchive>
+      <onlyIfSuccessful>false</onlyIfSuccessful>
+      <fingerprint>false</fingerprint>
+      <defaultExcludes>true</defaultExcludes>
+      <caseSensitive>true</caseSensitive>
+      <followSymlinks>false</followSymlinks>
+    </hudson.tasks.ArtifactArchiver>
+  </publishers>
+  <buildWrappers>
+    <org.jenkinsci.plugins.credentialsbinding.impl.SecretBuildWrapper plugin="credentials-binding@523.vd859a_4b_122e6">
+      <bindings>
+        <org.jenkinsci.plugins.credentialsbinding.impl.UsernamePasswordMultiBinding>
+          <credentialsId>nexus-read-creds</credentialsId>
+          <usernameVariable>nexus_user</usernameVariable>
+          <passwordVariable>nexus_password</passwordVariable>
+        </org.jenkinsci.plugins.credentialsbinding.impl.UsernamePasswordMultiBinding>
+      </bindings>
+    </org.jenkinsci.plugins.credentialsbinding.impl.SecretBuildWrapper>
+    <hudson.plugins.timestamper.TimestamperBuildWrapper plugin="timestamper@1.17"/>
+    <org.jenkinsci.plugins.golang.GolangBuildWrapper plugin="golang@1.4">
+      <goVersion>Go 1.16</goVersion>
+    </org.jenkinsci.plugins.golang.GolangBuildWrapper>
+  </buildWrappers>
+</project>
