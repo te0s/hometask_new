@@ -4,8 +4,6 @@ resource "kubernetes_namespace" "wcg-ns" {
   }
 }
 
-
-
 resource "kubernetes_deployment" "wcg-deployment" {
   metadata {
     name      = "wcg-deployment"
