@@ -7,7 +7,7 @@ terraform {
 }
 
 provider "kubernetes" {
-    host = "192.168.59.100:8443"
+    host = var.server_addr
 
     client_certificate = "${file("/Users/teos/.minikube/profiles/minikube/client.crt")}"
     client_key = "${file("/Users/teos/.minikube/profiles/minikube/client.key")}"
@@ -17,7 +17,7 @@ provider "kubernetes" {
 
 resource "kubernetes_deployment" "staticdeploy" {
     metadata {
-        name = "staticdeploy"
+        name = var.docker_name
         labels = {
             App = "static"
         }
@@ -43,7 +43,7 @@ resource "kubernetes_deployment" "staticdeploy" {
                     image_pull_policy = "IfNotPresent"
 
                     port {
-                        container_port = "8080"
+                        container_port = var.image_port
                     }
                     resources {
                         limits = {

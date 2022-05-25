@@ -1,24 +1,12 @@
-variable "server_addr" {
-  description = "192.168.59.100:8443"
-  type        = string
-}
+variable "server_addr" {}
 
-variable "replic_count" {
-  description = "3"
-  type        = string
-}
+variable "replic_count" {}
 
-variable "image_port" {
-  description = "8080"
-  type        = string
-}
+variable "app_name" {}
 
-variable "container_name" {
-  description = "staticdeploy"
-  type        = string
-}
+variable "image_port" {}
 
-variable "docker_name" {
-  description = "staticdepoy"
-  type        = string
-}
+variable "container_name" {}
+
+variable "docker_name" {}
+
