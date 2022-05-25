@@ -7,7 +7,7 @@ terraform {
 }
 
 provider "kubernetes" {
-    host = var.server_addr
+    host = "192.168.59.100:8443"
 
     client_certificate = "${file("/Users/teos/.minikube/profiles/minikube/client.crt")}"
     client_key = "${file("/Users/teos/.minikube/profiles/minikube/client.key")}"
@@ -43,7 +43,7 @@ resource "kubernetes_deployment" "staticdeploy" {
                     image_pull_policy = "IfNotPresent"
 
                     port {
-                        container_port = var.image_port
+                        container_port = "8080"
                     }
                     resources {
                         limits = {
