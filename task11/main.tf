@@ -55,7 +55,7 @@ resource "kubernetes_deployment" "staticdeploy" {
                             memory = "50Mi"
                         }
                     }
-                    readreadiness_probe {
+                    readiness_probe {
                         http_get {
                             path = "/"
                             port = 80
@@ -69,7 +69,7 @@ resource "kubernetes_deployment" "staticdeploy" {
                           path = "/"
                           port = 80
                         }
-                        initial_delay_seconds = 15
+                        initial_delay_seconds = 10
                         period_seconds        = 5  
                     }   
                 }
