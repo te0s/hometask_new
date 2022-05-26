@@ -3,5 +3,6 @@
   app_name = "staticdeploy"
   image_name = "staticdeploy:latest" #можно указать хранилище, по умлочанию берет их докерхаба 
   image_port = "8080"
+  port_tcp = "80"
   container_name = "staticdeploy"
   docker_name = "staticdepoy"

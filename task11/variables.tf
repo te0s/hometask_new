@@ -11,3 +11,5 @@ variable "container_name" {}
 variable "docker_name" {}
 
 variable "image_name" {}
+
+variable "port_tcp" {}
