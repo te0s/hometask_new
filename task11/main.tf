@@ -64,7 +64,7 @@ resource "kubernetes_deployment" "staticdeploy" {
                         period_seconds        = 5  
                     
                     }
-                    lliveness_probe {
+                    liveness_probe {
                         http_get {
                           path = "/"
                           port = 80
