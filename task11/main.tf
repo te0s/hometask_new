@@ -17,7 +17,7 @@ provider "kubernetes" {
 
 resource "kubernetes_deployment" "staticdeploy" {
     metadata {
-        name = var.docker_name
+        name = var.app_name
         labels = {
             App = "static"
         }
@@ -55,6 +55,23 @@ resource "kubernetes_deployment" "staticdeploy" {
                             memory = "50Mi"
                         }
                     }
+                    readreadiness_probe {
+                        http_get {
+                            path = "/"
+                            port = 80
+                        }
+                        initial_delay_seconds = 15
+                        period_seconds        = 5  
+                    
+                    }
+                    lliveness_probe {
+                        http_get {
+                          path = "/"
+                          port = 80
+                        }
+                        initial_delay_seconds = 15
+                        period_seconds        = 5  
+                    }   
                 }
             }
         }
