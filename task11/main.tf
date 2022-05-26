@@ -77,3 +77,22 @@ resource "kubernetes_deployment" "staticdeploy" {
         }
     }
 }
+
+resource "kubernetes_service" "lb" {
+    metadata {
+      name = "service-static"
+    }
+    spec {
+        selector = {
+          App = "static"
+        }
+        port {
+          protocol    = "TCP"
+          node_port   = 30808
+          port        = 80
+          target_port = 80
+        }
+        type = "LoadBalancer"
+    }
+  
+}
