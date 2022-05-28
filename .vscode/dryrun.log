@@ -1,4 +1,6 @@
-make.exe --dry-run --always-make --keep-going --print-directory
-"make.exe" �� ���� ����७��� ��� ���譥�
-��������, �ᯮ��塞�� �ணࠬ��� ��� ������ 䠩���.
+make --dry-run --always-make --keep-going --print-directory
+make: Entering directory `/Users/teos/devops/hometask_new'
+make: Leaving directory `/Users/teos/devops/hometask_new'
+ 
+make: *** No targets specified and no makefile found.  Stop.
 
