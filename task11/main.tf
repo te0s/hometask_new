@@ -88,11 +88,11 @@ resource "kubernetes_service" "lb" {
         }
         port {
           protocol    = "TCP"
-          node_port   = 30808
+          node_port   = 31080
           port        = 80
           target_port = 80
         }
-        type = "LoadBalancer"
+        type = "NodePort"
     }
   
 }
