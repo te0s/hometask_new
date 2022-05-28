@@ -38,7 +38,7 @@ resource "kubernetes_deployment" "staticdeploy" {
             }
             spec {
                 container {
-                    image = "${var.docker_name}:latest"
+                    image = "${var.image_name}:latest"
                     name  = var.container_name
                     image_pull_policy = "IfNotPresent"
 
