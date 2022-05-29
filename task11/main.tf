@@ -1,4 +1,11 @@
 terraform {
+    backend "kubernetes" {
+      secret_suffix    = "state"
+      host = "${var.server_addr}:8443"
+      config_path      = "~/.kube/config"
+      namespace = "kube-system"
+    }
+
     required_providers {
         kubernetes = {
             source = "hashicorp/kubernetes"
