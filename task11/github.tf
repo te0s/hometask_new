@@ -5,10 +5,15 @@ resource "github_repository" "terraform-modules" {
 }
 
 resource "github_repository_file" "name" {
+    count = lenght(var.files)
     repository = github_repository.terraform-modules.name
     branch = github_repository.terraform-modules.default_branch
     file = "service/main.tf"
-    content = file("${var.path_to_file}/service.tf")
+    content = file("${var.path_to_file}/${element(var.files, count.index)}")
+    commit_message = "add by Terraform"
+    commit_author = "Te0s"
+    commit_email = "teos.otaku@gmail.com"
+    overwrite_on_create = true
 
   
 }

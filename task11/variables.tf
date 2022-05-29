@@ -23,3 +23,12 @@ variable "terraform_name" {}
 variable "path_to_file" {}
 
 variable "path_to_crt" {}
+
+variable "files" {
+    default = [
+        "main.tf"
+        "variables.tf"
+        "github.tf"
+        "terraform.tfvars"
+    ]
+}
