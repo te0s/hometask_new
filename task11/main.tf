@@ -107,8 +107,3 @@ resource "kubernetes_service" "nodeport" {
     }
   
 }
-
-resource "github "git-push" {
-
-
-}
