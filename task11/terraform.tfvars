@@ -10,5 +10,5 @@
   terraform_name = "terraform-modules"
   path_to_file = "/Users/teos/DevOps/task11"
   path_to_crt = "/Users/teos"
-  tocken = JHSGSJGSJGSJHGDJHGDJGDFDGHFHAF
+  tocken = "JHSGSJGSJGSJHGDJHGDJGDFDGHFHAF"
   exicute = "1"
