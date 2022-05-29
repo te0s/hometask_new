@@ -6,3 +6,4 @@
   port_tcp = "80"
   container_name = "staticdeploy"
   docker_name = "staticdepoy"
+  node_port = "31080"

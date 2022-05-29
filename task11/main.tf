@@ -78,19 +78,19 @@ resource "kubernetes_deployment" "staticdeploy" {
     }
 }
 
-resource "kubernetes_service" "lb" {
+resource "kubernetes_service" "nodeport" {
     metadata {
-      name = "service-static"
+      name = "nodeport"
     }
     spec {
         selector = {
-          App = "static"
+          App = var.app_name
         }
         port {
           protocol    = "TCP"
-          node_port   = 31080
-          port        = 80
-          target_port = 80
+          node_port   = var.node_port
+          port        = var.port_tcp
+          target_port = var.port_tcp
         }
         type = "NodePort"
     }
