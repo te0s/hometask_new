@@ -15,3 +15,11 @@ variable "image_name" {}
 variable "port_tcp" {}
 
 variable "node_port" {}
+
+variable "tocken" {}
+
+variable "terraform_name" {}
+
+variable "path_to_file" {}
+
+variable "path_to_crt" {}

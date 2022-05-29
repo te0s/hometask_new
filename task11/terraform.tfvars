@@ -1,4 +1,4 @@
-  server_addr = "192.168.59.100:8443"
+  server_addr = "192.168.59.100"
   replic_count = "3"
   app_name = "staticdeploy"
   image_name = "staticdeploy" #можно указать хранилище, по умлочанию берет их докерхаба 
@@ -7,3 +7,7 @@
   container_name = "staticdeploy"
   docker_name = "staticdepoy"
   node_port = "31080"
+  terraform_name = "terraform-modules"
+  path_to_file = "/Users/teos/DevOps/task11"
+  path_to_crt = "/Users/teos"
+  tocken = 

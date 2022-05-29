@@ -3,15 +3,26 @@ terraform {
         kubernetes = {
             source = "hashicorp/kubernetes"
         }
+        github = {
+            source = "integrations/github"
+            versionversion = "~> 4.0"
+        }
     } 
 }
 
-provider "kubernetes" {
-    host = var.server_addr
+provider "github" {
+    tocken = var.tocken
+}
 
-    client_certificate = "${file("/Users/teos/.minikube/profiles/minikube/client.crt")}"
-    client_key = "${file("/Users/teos/.minikube/profiles/minikube/client.key")}"
-    cluster_ca_certificate  = "${file("/Users/teos/.minikube/ca.crt")}"
+
+
+
+provider "kubernetes" {
+    host = "${var.server_addr}:8443"
+
+    client_certificate = "${file("${var.path_to_crt}/.minikube/profiles/minikube/client.crt")}"
+    client_key = "${file("${var.path_to_crt}/.minikube/profiles/minikube/client.key")}"
+    cluster_ca_certificate  = "${file("${var.path_to_crt}/.minikube/ca.crt")}"
 }
 
 
@@ -95,4 +106,9 @@ resource "kubernetes_service" "nodeport" {
         type = "NodePort"
     }
   
+}
+
+resource "github "git-push" {
+
+
 }
