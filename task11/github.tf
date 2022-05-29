@@ -5,7 +5,7 @@ resource "github_repository" "terraform-modules" {
 }
 
 resource "github_repository_file" "name" {
-    count = lenght(var.files)
+    count = length(var.files)
     repository = github_repository.terraform-modules.name
     branch = github_repository.terraform-modules.default_branch
     file = "service/main.tf"
