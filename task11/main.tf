@@ -1,7 +1,7 @@
 terraform {
   backend "kubernetes" {
     secret_suffix = "state"
-    host          = "https://192.168.59.100:8443"
+    host          = "192.168.59.100:8443"
     config_path   = "~/.kube/config"
     namespace     = "kube-system"
   }
@@ -25,7 +25,7 @@ provider "github" {
 
 
 provider "kubernetes" {
-  host = "https://192.168.59.100:8443"
+  host = "${var.server_addr}:8443"
 
   client_certificate     = file("${var.path_to_crt}/.minikube/profiles/minikube/client.crt")
   client_key             = file("${var.path_to_crt}/.minikube/profiles/minikube/client.key")
