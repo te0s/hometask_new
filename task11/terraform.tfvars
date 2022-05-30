@@ -1,3 +1,4 @@
+server_addr    = "https://192.168.59.100:8443"
 replic_count   = "3"
 app_name       = "staticdeploy"
 image_name     = "staticdeploy" #можно указать хранилище, по умлочанию берет их докерхаба 

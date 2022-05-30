@@ -25,7 +25,8 @@ provider "github" {
 
 
 provider "kubernetes" {
-  host = "${var.server_addr}:8443"
+  
+  host = var.server_addr
 
   client_certificate     = file("${var.path_to_crt}/.minikube/profiles/minikube/client.crt")
   client_key             = file("${var.path_to_crt}/.minikube/profiles/minikube/client.key")
