@@ -1,7 +1,7 @@
 terraform {
   backend "kubernetes" {
     secret_suffix = "state"
-    host          = "192.168.59.100:8443"
+    host          = "https://192.168.59.100:8443"
     config_path   = "~/.kube/config"
     namespace     = "kube-system"
   }
