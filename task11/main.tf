@@ -1,27 +1,25 @@
 terraform {
-  backend "kubernetes" {
-    secret_suffix = "state"
-    host          = "192.168.59.100:8443"
-    config_path   = "~/.kube/config"
-    namespace     = "kube-system"
-  }
-
   required_providers {
     kubernetes = {
-      source = "hashicorp/kubernetes"
+      source  = "hashicorp/kubernetes"
+      version = "2.11.0"
     }
+  
     github = {
-      source  = "integrations/github"
+      source = "integrations/github"
       version = "~> 4.0"
     }
+  }
+  
+  backend "kubernetes" {
+    secret_suffix    = "state"
+    config_path      = "~/.kube/config"
   }
 }
 
 provider "github" {
-  token = var.tocken
+  token = var.token  
 }
-
-
 
 
 provider "kubernetes" {
