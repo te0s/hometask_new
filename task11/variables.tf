@@ -32,3 +32,5 @@ variable "files" {
     "terraform.tfvars"
   ]
 }
+
+variable "github_repository" {}

@@ -7,7 +7,7 @@
 
 resource "github_repository_file" "name" {
   count               = length(var.files)
-  repository          = github_repository.terraform-modules.name
+  repository          = var.github_repository
   branch              = "master"
   file                = "task11/${element(var.files, count.index)}"
   content             = file("${var.path_to_file}/${element(var.files, count.index)}")
