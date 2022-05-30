@@ -2,10 +2,12 @@
 # Manual edits may be lost in future updates.
 
 provider "registry.terraform.io/hashicorp/kubernetes" {
-  version = "2.11.0"
+  version     = "2.11.0"
+  constraints = "2.11.0"
   hashes = [
     "h1:T65SZhN/tQgsAsHe/G5PCgpjofi+aTKPZ+nZg6WOJpc=",
     "h1:d5NamuGihJgxmtSq07kSZblnJuekkjdFdRLTDeGb0us=",
+    "h1:pJiAJwZKUaoAJ4x+3ONJkwEVkjrwGROCGFgj7noPO58=",
     "zh:143a19dd0ea3b07fc5e3d9231f3c2d01f92894385c98a67327de74c76c715843",
     "zh:1fc757d209e09c3cf7848e4274daa32408c07743698fbed10ee52a4a479b62b6",
     "zh:22dfebd0685749c51a8f765d51a1090a259778960ac1cd4f32021a325b2b9b72",
@@ -25,6 +27,7 @@ provider "registry.terraform.io/integrations/github" {
   version     = "4.26.0"
   constraints = "~> 4.0"
   hashes = [
+    "h1:eNvbfw3jxqfIq8dvUFSp4pUtKqCS3lrHV+oE9PQQDqc=",
     "h1:t5uqln0DVAbufHGTsHJfXM/6sPKSI7qg9g7l/WxPWFg=",
     "zh:054cd4788849352476e3f08a794a5ea7429d5c69b6946db1d0c09f879d622e5d",
     "zh:0f0fbe979c79087e8265459b698ed78a067d4616947c3732eb4a64f219a2d8c6",
