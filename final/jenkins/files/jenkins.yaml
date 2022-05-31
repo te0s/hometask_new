@@ -1,0 +1,59 @@
+---
+- name: config jenkins
+  hosts: localhost
+  become: true
+  pre_tasks:
+    - name: install packages
+      apt:
+        state: latest
+        name: "{{ item }}"
+      loop:
+        - vim
+        - git
+        - wget
+        - curl
+        - docker.io
+
+  vars:
+    jenkins_java_options: "-Djenkins.install.runSetupWizard=false -Dhudson.security.csrf.DefaultCrumbIssuer.EXCLUDE_SESSION_ID=true -Dorg.jenkinsci.plugins.durabletask.BourneShellScript.LAUNCH_DIAGNOSTICS=true"
+    jenkins_plugin_timeout: 300
+    jenkins_plugins:
+      - git
+      - github
+      - docker-workflow
+      - nexus-artifact-uploader
+      - timestamper
+      - golang
+      - workflow-aggregator
+      
+      
+  post_tasks:
+  
+    - name: add user
+      user:
+        name: "{{ item }}"
+        append: true
+        groups: "docker"
+      loop:
+        - jenkins
+    - copy:
+        src: /tmp/files/jenkins/
+        dest: /var/lib/jenkins/
+        owner: jenkins
+        group: jenkins
+
+    - name: remove identity key
+      file:
+        path: /var/lib/jenkins/identity.key.enc
+        state: absent
+
+    - name: wait for jenkins started
+      shell: sleep 20
+
+    - name: restart jenkins
+      service:
+        name: jenkins
+        state: restarted
+  roles:
+    - role: geerlingguy.java
+    - role: geerlingguy.jenkins

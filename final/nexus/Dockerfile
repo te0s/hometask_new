@@ -1,7 +1,9 @@
 FROM debian:buster
 
-RUN apt-get clean && apt-get update \
-&& apt-get install -y ansible
-COPY ./nexus.yml /temp/nexus.yml
-RUN ansible-galaxy install ansible-thoteam.nexus3-oss && ansible-playbook /temp/nexus.yml
-CMD /etc/init.d/nexus run
+RUN apt-get update && apt-get install -y ansible
+
+ADD files /tmp/files
+
+RUN ansible-galaxy install geerlingguy.java && ansible-galaxy install ansible-thoteam.nexus3-oss && ansible-playbook /tmp/files/nexus.yaml
+
+CMD /etc/init.d/nexus run 

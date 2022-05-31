@@ -2,30 +2,33 @@ version: "3"
 
 services:
 
-  nexus:
-    build: nexus/
-    stdin_open: true
-    networks:
-      - lan        
-    ports:
-      - 81:8081
-    container_name: jenkins
-
   jenkins:
-    build: jenkins/
-    stdin_open: true
+    build: ./jenkins/
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - workspace:/var/lib/jenkins/workspace    
+      - jenkins-workspace:/var/lib/jenkins/
     networks:
-      - lan
+      app_net:
+        ipv4_address: 192.168.56.10
     ports:
-        - 80:8080
-    container_name: nexus
+      - 80:8080
+
+
+  nexus:
+    build: ./nexus/
+    networks:
+      app_net:
+        ipv4_address: 192.168.56.11
+    ports:
+      - 81:8081
 
 networks:
-    lan:
-
+  app_net:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 192.168.56.0/24
+        
 volumes:
-  workspace:
-    external: false
+  jenkins-workspace:

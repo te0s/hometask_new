@@ -2,14 +2,20 @@
 <org.jenkinsci.plugins.golang.GolangBuildWrapper_-DescriptorImpl plugin="golang@1.4">
   <installations>
     <org.jenkinsci.plugins.golang.GolangInstallation>
-      <name>Go 1.16</name>
+      <name>Go 1.13.15</name>
       <home></home>
       <properties>
         <hudson.tools.InstallSourceProperty>
           <installers>
-            <org.jenkinsci.plugins.golang.GolangInstaller>
-              <id>1.16</id>
-            </org.jenkinsci.plugins.golang.GolangInstaller>
+            <hudson.tools.CommandInstaller>
+              <command>test -e ./bin/go &amp;&amp; exit
+wget -q https://golang.org/dl/go1.13.15.linux-amd64.tar.gz
+rm -rf go
+tar xzf go1.13.15.linux-amd64.tar.gz
+rm -f go1.13.15.linux-amd64.tar.gz
+mv go/* .</command>
+              <toolHome>.</toolHome>
+            </hudson.tools.CommandInstaller>
           </installers>
         </hudson.tools.InstallSourceProperty>
       </properties>
