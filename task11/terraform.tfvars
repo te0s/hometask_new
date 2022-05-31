@@ -1,4 +1,4 @@
-server_addr    = "192.168.59.100"
+server_addr    = "https://192.168.59.100:8443"
 replic_count   = "3"
 app_name       = "staticdeploy"
 image_name     = "staticdeploy" #можно указать хранилище, по умлочанию берет их докерхаба 
@@ -9,5 +9,6 @@ docker_name    = "staticdepoy"
 node_port      = "31080"
 terraform_name = "terraform-modules"
 path_to_file   = "/Users/teos/DevOps/task11"
-path_to_crt    = "/Users/teos"
+path_to_crt    = "/home/vagrant"
 tocken         = "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"
+github_repository = "hometask_new"
