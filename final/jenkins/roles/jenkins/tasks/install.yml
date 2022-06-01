@@ -1,0 +1,74 @@
+    - name: setup Jenkins
+      apt:
+        pkg:
+        - daemon
+        - git
+        - build-essential
+        - python-pip-whl
+        - python3-pip
+        - openjdk-11-jdk
+        state: present
+        update_cache: yes
+
+    - name: install Python
+      pip:
+        name:
+          - python-jenkins
+          - lxml
+
+    - name: add Jenkins key
+      apt_key:
+        url: https://pkg.jenkins.io/debian/jenkins.io.key
+        state: present
+
+    - name: add Jenkins repo
+      apt_repository:
+        repo: deb https://pkg.jenkins.io/debian-stable binary/
+        state: present
+        update_cache: yes
+
+    - name: install Jenkins
+      apt:
+        pkg:
+        - jenkins
+        state: present
+      ignore_errors: yes
+
+    - name: delete file inintialAdminPassword
+      file:
+        path: /var/lib/jenkins/secrets/initialAdminPassword
+        state: absent
+
+    - name: copy admin_user
+      copy:
+        src: users/
+        dest: /var/lib/jenkins/users
+        owner: jenkins
+        group: jenkins
+
+    - name: copy templates
+      copy:
+        src: /templates/
+        dest: /var/lib/jenkins/
+        owner: jenkins
+        group: jenkins
+
+    - name: disable start wizard
+      lineinfile:
+         path: "{{ item.path }}"
+         state: present
+         regexp: "{{ item.exp }}"
+         line: "{{ item.n_ln }}"
+      with_items:
+        - { path: "/etc/default/jenkins", exp: '^JAVA_ARGS="-Djava.awt.headless=true"', n_ln: 'JAVA_ARGS="-Djava.awt.headless=true -Djenkins.install.runSetupWizard=false -Dhudson.security.csrf.DefaultCrumbIssuer.EXCLUDE_SESSION_ID=true"' }
+
+    - name: start Jenkins
+      sysvinit:
+        name: jenkins
+        state: started
+        enabled: yes
+
+    - name: sleep for 150 seconds
+      wait_for:
+        timeout: 150
+      delegate_to: localhost

@@ -1,0 +1,22 @@
+version: '3'
+services:
+
+  jenkins:
+    build:
+      context: ./jenkins
+      dockerfile: Dockerfile
+    container_name: jenkins
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - jks_vol:/var/lib/jenkins/workspace/
+    network_mode: host
+
+  nexus:
+    build:
+      context: ./nexus
+      dockerfile: Dockerfile
+    container_name: nexus
+    network_mode: host
+
+volumes:
+    jks_vol:

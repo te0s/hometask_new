@@ -1,0 +1,10 @@
+---
+jenkins_ip: localhost
+nexus_ip: localhost
+staging_ip: localhost
+production_ip: localhost
+jenkins_user: admin
+jenkins_password: admin
+nexus_user_uploader: uploader
+nexus_user_downloader: downloader
+nexus_repo: word-cloud-build
