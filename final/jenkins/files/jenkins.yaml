@@ -20,11 +20,15 @@
     jenkins_plugins:
       - git
       - github
+      - credentials
       - docker-workflow
       - nexus-artifact-uploader
+      - pipeline-stage-view
+      - pipeline-github-lib
       - timestamper
       - golang
       - workflow-aggregator
+      - pipeline
       
       
   post_tasks:
